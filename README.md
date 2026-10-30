@@ -1,4 +1,4 @@
-# Family Table Devotions
+# Family Devotions
 
 Nightly Lutheran (LCMS) family devotions with ESV Scripture and a printable kids' activity sheet for each day.
 

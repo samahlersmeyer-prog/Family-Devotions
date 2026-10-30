@@ -61,7 +61,7 @@ function devoPrint(d){return `<div class="devo"><h1>${d.title}</h1><p class="r">
  <h2>Closing prayer</h2><p>${d.prayer} ${hlPrayer().replace(/<span class="blank">\(the (highs|lows)\)<\/span>/g,'______')} ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
 function fmt(s){const d=parse(s);return `${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]}, ${['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()]} ${d.getDate()}`}
 function doPrint(html){$('#printArea').innerHTML=html;window.print()}
-function famEditor(){return `<div class="fam"><p class="note">Who’s at the table? Add each person once. Names stay on this device only.</p>
+function famEditor(){return `<div class="fam"><p class="note">Who’s joining devotions? Add each person once. Names stay on this device only.</p>
  <div class="famlist">${family.map((n,i)=>`<span class="chip">${esc(n)} <button type="button" class="x" data-rm="${i}" aria-label="Remove ${esc(n)}">×</button></span>`).join('')}</div>
  <form id="famForm" class="famform"><label for="famName" class="sr">Name</label><input id="famName" maxlength="24" placeholder="Name" autocomplete="off"><button class="btn" type="submit">Add</button>${family.length?'<button class="btn" type="button" id="famDone">Done</button>':''}</form></div>`}
 function hlBlock(){if(!family.length||editFam)return `<p>Everyone shares one high and one low, Mom and Dad included.</p>${famEditor()}`;
