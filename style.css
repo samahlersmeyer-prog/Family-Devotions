@@ -1,0 +1,95 @@
+/* One-column reading app: sticky week strip, tonight's devotion as numbered steps */
+:root{--bg:#f7f8f5;--card:#fff;--ink:#1d211e;--muted:#5d655f;--line:#dfe3dc;--green:#2f5a43;--green-soft:#e6efe8;--gold:#b7802a;--rubric:#a3262a;
+--display:"Fredoka","Trebuchet MS",system-ui,sans-serif;--body:"Source Serif 4",Georgia,serif}
+@media (prefers-color-scheme:dark){:root{--bg:#141815;--card:#1d221f;--ink:#e9ece7;--muted:#a3aca5;--line:#2f3631;--green:#8cc4a2;--green-soft:#22312a;--gold:#e0ae5c;--rubric:#ef8a85;color-scheme:dark}}
+*{box-sizing:border-box}
+html{scroll-padding-top:150px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:1.08rem;line-height:1.6;padding-top:env(safe-area-inset-top,0px)}
+.wrap{max-width:44rem;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.bar{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line)}
+header .wrap{padding-block:.7rem .6rem}
+.brand{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.brand h1{font-family:var(--display);font-weight:600;font-size:1.3rem;margin:0;color:var(--green)}
+.today{font-family:var(--display);font-size:.9rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:.25rem .8rem;cursor:pointer}
+.weeknav{display:grid;grid-template-columns:auto 1fr auto;gap:.3rem;align-items:center;margin-top:.55rem}
+.arrow{font-family:var(--display);font-size:1.4rem;line-height:1;border:0;background:none;color:var(--green);width:1.8rem;height:2.4rem;cursor:pointer;border-radius:8px}
+.arrow:disabled{opacity:.25;cursor:default}
+.days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.3rem}
+.days button{font-family:var(--display);border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:.35rem 0;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative;min-width:0}
+.days button .d{font-weight:600;font-size:.9rem}.days button .n{font-size:.72rem;color:var(--muted)}
+.days button.is-today{border-color:var(--gold)}
+.days button[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--bg)}
+.days button[aria-pressed="true"] .n{color:var(--bg);opacity:.85}
+.days button:disabled{opacity:.35;cursor:default}
+.days .check{position:absolute;top:-6px;right:-4px;width:17px;height:17px;border-radius:50%;background:var(--gold);color:#fff;font-size:.65rem;display:none;place-items:center}
+.days button.done .check{display:grid}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+main{padding-block:1.2rem 3rem}
+.hero{display:grid;gap:.2rem;margin-bottom:.8rem}
+.eyebrow{font-family:var(--display);font-size:.85rem;color:var(--gold);font-weight:600;letter-spacing:.04em}
+.hero h2{font-family:var(--display);font-weight:600;font-size:2.1rem;line-height:1.1;margin:0;text-wrap:balance}
+.meta{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.35rem}
+.chip{font-family:var(--display);font-size:.85rem;background:var(--green-soft);color:var(--green);border-radius:999px;padding:.15rem .7rem}
+.tabs{display:flex;gap:.3rem;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:.25rem;margin:.6rem 0 1rem}
+.tab{flex:1;font-family:var(--display);font-size:1rem;border:0;background:none;color:var(--muted);padding:.5rem;border-radius:10px;cursor:pointer}
+.tab[aria-selected="true"]{background:var(--green-soft);color:var(--green);font-weight:600}
+.steps{display:grid;gap:.8rem;counter-reset:s}
+.step{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:1rem 1.1rem;counter-increment:s;min-width:0}
+.step h3{font-family:var(--display);font-weight:600;font-size:1.1rem;margin:0 0 .35rem;display:flex;gap:.55rem;align-items:center;color:var(--green)}
+.step h3::before{content:counter(s);display:grid;place-items:center;width:1.6rem;height:1.6rem;border-radius:50%;background:var(--green-soft);font-size:.9rem;flex:none}
+.step p{margin:.4rem 0}
+.rub{color:var(--rubric);font-style:italic;font-size:.95rem}
+.scripture{font-size:1.15rem;line-height:1.7}
+.scripture sup{font-family:var(--display);color:var(--gold);font-size:.7rem;font-weight:600;margin-right:.15rem}
+.ref{font-family:var(--display);color:var(--muted);font-size:.9rem}
+.teach{background:var(--green-soft);border-radius:12px;padding:.5rem .9rem}
+.qs{display:grid;gap:.5rem;margin:0;padding:0;list-style:none}
+.qs li{display:grid;gap:.1rem}.qs .who{font-family:var(--display);font-weight:600;color:var(--gold);font-size:.9rem}
+.hymn{font-style:italic;line-height:1.75}
+.blank{color:var(--muted);font-style:italic}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:.6rem;flex-wrap:wrap;background:var(--card);border:1px dashed var(--gold);border-radius:14px;padding:.5rem .8rem}
+.btn{font-family:var(--display);font-size:1rem;border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;padding:.55rem 1rem;cursor:pointer}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#fff;font-weight:600}
+.btn.primary.is-done{background:var(--green);border-color:var(--green)}
+.nav{display:flex;justify-content:space-between;gap:.6rem;margin-top:1.2rem;flex-wrap:wrap}
+.pic{background:#fff;border-radius:12px;border:1px solid var(--line);overflow:hidden}.pic svg{display:block;width:100%;height:auto}
+.ws{border-collapse:collapse;margin:.3rem auto;font-family:var(--display);font-weight:600}
+.ws td{width:1.9rem;height:1.9rem;text-align:center;border:1px solid var(--line);cursor:pointer;user-select:none}
+.ws td.on{background:var(--gold);color:#fff}
+.ws td.hit{outline:2px solid var(--green);outline-offset:-3px;color:var(--green)}
+.words,.bank{display:flex;flex-wrap:wrap;gap:.35rem;justify-content:center;margin-top:.4rem}
+.blanks{margin:0;padding-left:1.2rem}.blanks li{margin:.35rem 0}
+.ans{color:var(--green);text-decoration:underline;text-underline-offset:3px}
+.choice{display:flex;gap:.5rem;margin:.25rem 0 .6rem;flex-wrap:wrap}
+.choice span{font-family:var(--display);border:1.5px solid var(--line);border-radius:999px;padding:.15rem .8rem}
+.choice span.right{border-color:var(--green);background:var(--green-soft);color:var(--green);font-weight:600}
+.note{font-size:.88rem;color:var(--muted)}
+footer{font-size:.78rem;color:var(--muted);margin-top:2rem;line-height:1.5}
+#printArea{display:none}
+@media (max-width:440px){.hero h2{font-size:1.75rem}.ws td{width:1.55rem;height:1.55rem;font-size:.9rem}.days button .d{font-size:.8rem}}
+/* Print */
+.sheet{font-family:"Fredoka","Trebuchet MS",Arial,sans-serif;color:#000}
+@page{size:letter;margin:.4in .45in}
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  header.bar,main{display:none!important}
+  #printArea{display:block}
+  .sheet .top{display:flex;justify-content:space-between;align-items:end}
+  .sheet h1{font-size:21pt;margin:0;font-weight:600}
+  .sheet .name span{display:inline-block;width:2in;border-bottom:2px solid #777}
+  .sheet .lede{margin:.06in 0 .08in;font-size:10.5pt}
+  .sheet .p svg{width:100%;height:auto;max-height:2.9in;display:block}
+  .sheet .g{display:grid;grid-template-columns:1fr 1fr;gap:.1in;margin-top:.1in;font-size:10.5pt}
+  .sheet .b{border:2px solid #888;border-radius:10px;padding:.07in .12in}
+  .sheet .full{grid-column:1/-1}
+  .sheet h2{font-size:12pt;margin:0 0 .04in;font-weight:600}
+  .sheet ol{margin:0;padding-left:.22in}.sheet li{margin:.05in 0}
+  .sheet .f{display:inline-block;min-width:.85in;border-bottom:2px solid #777}
+  .sheet table{border-collapse:collapse;margin:0 auto;font-weight:600}
+  .sheet td{width:.24in;height:.24in;text-align:center;border:1px solid #999;font-size:10pt}
+  .sheet .c{display:flex;gap:.2in;justify-content:center;margin:.03in 0 .07in}.sheet .c span{border:2px solid #888;border-radius:999px;padding:.01in .16in}
+  .sheet .draw{min-height:1.3in}
+  .devo{font-family:Georgia,serif;font-size:11pt;line-height:1.45;color:#000}
+  .devo h1{font-size:18pt;margin:0 0 .05in}.devo h2{font-size:12pt;margin:.14in 0 .03in}.devo p{margin:.04in 0}
+  .devo .r{font-style:italic;color:#555}
+}
