@@ -2,6 +2,9 @@
 const $=s=>document.querySelector(s);
 const store={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 let DAYS=[],byDate={},done=store.get('done')||{},cur=null,tab='devotion',showAns=false;
+let family=store.get('family')||[],log=store.get('log')||{},editFam=false,jFilter='';
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const saveLog=()=>{for(const d in log){for(const n in log[d]){const e=log[d][n];if(!e.h&&!e.l)delete log[d][n]}if(!Object.keys(log[d]).length)delete log[d]}store.set('log',log)};
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const parse=s=>{const[y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
@@ -29,9 +32,9 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  <section class="step"><h3>${d.story_title}</h3>${d.story.map(p=>`<p>${p}</p>`).join('')}</section>
  <section class="step"><h3>${d.teach_title}</h3><div class="teach">${d.teach.map(p=>`<p>${p}</p>`).join('')}</div></section>
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
- <section class="step"><h3>Highs and lows</h3><p>Everyone shares one of each, Mom and Dad included. Listen for things to pray about.</p></section>
+ <section class="step" id="hl"><h3>Highs and lows</h3>${hlBlock()}</section>
  <section class="step"><h3>Doxology</h3><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p></section>
- <section class="step"><h3>Closing prayer</h3><p>${d.prayer} Thank You for <span class="blank">(the highs)</span>. Please help with <span class="blank">(the lows)</span>. ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
+ <section class="step"><h3>Closing prayer</h3><p>${d.prayer} <span id="hlPrayer">${hlPrayer()}</span> ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
  </div>`}
 function kids(d){const k=d.kids;
  return `<div class="steps">
@@ -55,14 +58,50 @@ function devoPrint(d){return `<div class="devo"><h1>${d.title}</h1><p class="r">
  <h2>Scripture: ${d.ref} (ESV)</h2><p>${d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join(' ')}</p><p class="r">Reader: ${d.reader}.</p>
  <h2>${d.story_title}</h2>${d.story.map(p=>`<p>${p}</p>`).join('')}<h2>${d.teach_title}</h2>${d.teach.map(p=>`<p>${p}</p>`).join('')}
  <h2>Questions</h2>${d.q.map(([w,t])=>`<p><b>${w}:</b> ${t}</p>`).join('')}<h2>Highs and lows · Doxology</h2>
- <h2>Closing prayer</h2><p>${d.prayer} Thank You for ______. Please help with ______. ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
+ <h2>Closing prayer</h2><p>${d.prayer} ${hlPrayer().replace(/<span class="blank">\(the (highs|lows)\)<\/span>/g,'______')} ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
 function fmt(s){const d=parse(s);return `${['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()]}, ${['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()]} ${d.getDate()}`}
 function doPrint(html){$('#printArea').innerHTML=html;window.print()}
+function famEditor(){return `<div class="fam"><p class="note">Who’s at the table? Add each person once. Names stay on this device only.</p>
+ <div class="famlist">${family.map((n,i)=>`<span class="chip">${esc(n)} <button type="button" class="x" data-rm="${i}" aria-label="Remove ${esc(n)}">×</button></span>`).join('')}</div>
+ <form id="famForm" class="famform"><label for="famName" class="sr">Name</label><input id="famName" maxlength="24" placeholder="Name" autocomplete="off"><button class="btn" type="submit">Add</button>${family.length?'<button class="btn" type="button" id="famDone">Done</button>':''}</form></div>`}
+function hlBlock(){if(!family.length||editFam)return `<p>Everyone shares one high and one low, Mom and Dad included.</p>${famEditor()}`;
+ const e=log[cur]||{};
+ return `<p>Everyone shares one high and one low. Type them in and they’ll show up in the closing prayer.</p><div class="hlrows">${family.map((n,i)=>`<div class="hlrow"><span class="who">${esc(n)}</span>
+ <label class="sr" for="h${i}">${esc(n)} high</label><input id="h${i}" data-n="${esc(n)}" data-k="h" placeholder="High ☀" value="${esc((e[n]||{}).h||'')}" maxlength="140">
+ <label class="sr" for="l${i}">${esc(n)} low</label><input id="l${i}" data-n="${esc(n)}" data-k="l" placeholder="Low ☁" value="${esc((e[n]||{}).l||'')}" maxlength="140"></div>`).join('')}</div>
+ <p class="note">Saved on this device. <button type="button" class="link" id="editFam">Edit family</button></p>`}
+function hlPrayer(){const e=log[cur]||{};const hs=[],ls=[];
+ family.forEach(n=>{const x=e[n];if(!x)return;if(x.h)hs.push(`<b>${esc(n)}</b>: ${esc(x.h)}`);if(x.l)ls.push(`<b>${esc(n)}</b>: ${esc(x.l)}`)});
+ return (hs.length?`Thank You for ${hs.join('; ')}.`:`Thank You for <span class="blank">(the highs)</span>.`)+' '+(ls.length?`Please help with ${ls.join('; ')}.`:`Please help with <span class="blank">(the lows)</span>.`)}
+function journal(){const dates=Object.keys(log).sort().reverse();const names=[...new Set(dates.flatMap(d=>Object.keys(log[d])))];
+ const rows=dates.map(dt=>{const ents=Object.entries(log[dt]).filter(([n])=>!jFilter||n===jFilter);if(!ents.length)return '';
+  return `<section class="step jday"><p class="ref"><button type="button" class="link" data-go="${dt}">${fmt(dt)}${byDate[dt]?' · '+esc(byDate[dt].title):''}</button></p>
+  ${ents.map(([n,x])=>`<div class="jent"><span class="who">${esc(n)}</span>${x.h?`<p>☀ ${esc(x.h)}</p>`:''}${x.l?`<p class="${x.ok?'okd':''}">☁ ${esc(x.l)} <label class="ans-ck"><input type="checkbox" data-d="${dt}" data-n="${esc(n)}" ${x.ok?'checked':''}> God answered</label></p>`:''}</div>`).join('')}</section>`}).join('');
+ return `<div class="steps"><div class="toolbar"><span class="note">Highs and lows from every night, newest first.</span></div>
+ ${names.length>1?`<div class="bank">${['',...names].map(n=>`<button type="button" class="chip fbtn ${jFilter===n?'on':''}" data-f="${esc(n)}">${n?esc(n):'Everyone'}</button>`).join('')}</div>`:''}
+ ${rows||'<section class="step"><p>No entries yet. Share highs and lows on the Devotion tab, and they’ll collect here for you to look back on.</p></section>'}
+ <section class="step"><h3>Back up your journal</h3><p class="note">The journal lives only on this device. Save a backup now and then, or to move it to another phone.</p>
+ <div class="nav" style="margin:0"><button class="btn" type="button" id="bk">Save backup</button><label class="btn" for="rs">Restore backup</label><input type="file" id="rs" accept=".json,application/json" class="sr"></div><p class="note" id="bkMsg"></p></section></div>`}
+function wireJournal(m){
+ m.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>go(b.dataset.go));
+ m.querySelectorAll('.fbtn').forEach(b=>b.onclick=()=>{jFilter=b.dataset.f;render()});
+ m.querySelectorAll('.ans-ck input').forEach(c=>c.onchange=()=>{const x=log[c.dataset.d][c.dataset.n];x.ok=c.checked;saveLog();c.closest('p').classList.toggle('okd',c.checked)});
+ const bk=$('#bk');if(bk)bk.onclick=()=>{const blob=new Blob([JSON.stringify({family,log,done},null,1)],{type:'application/json'});const u=URL.createObjectURL(blob);const a=document.createElement('a');a.href=u;a.download=`devotions-journal-${todayISO}.json`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);$('#bkMsg').textContent='Backup saved to your downloads.'};
+ const rs=$('#rs');if(rs)rs.onchange=()=>{const f=rs.files[0];if(!f)return;f.text().then(t=>{const j=JSON.parse(t);if(!j.log)throw 0;
+   for(const d in j.log){log[d]=Object.assign(log[d]||{},j.log[d])}family=[...new Set([...family,...(j.family||[])])];Object.assign(done,j.done||{});
+   store.set('family',family);saveLog();store.set('done',done);render();$('#bkMsg').textContent='Backup restored.'}).catch(()=>{$('#bkMsg').textContent='That file isn’t a journal backup. Pick the .json file you saved.'})}}
+function wireHL(m){
+ const ff=$('#famForm');if(ff)ff.onsubmit=e=>{e.preventDefault();const v=$('#famName').value.trim();if(v&&!family.includes(v)){family.push(v);store.set('family',family)}editFam=true;render();const n=$('#famName');if(n)n.focus()};
+ m.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{family.splice(+b.dataset.rm,1);store.set('family',family);render()});
+ const fd=$('#famDone');if(fd)fd.onclick=()=>{editFam=false;render()};
+ const ef=$('#editFam');if(ef)ef.onclick=()=>{editFam=true;render()};
+ m.querySelectorAll('.hlrow input').forEach(inp=>inp.oninput=()=>{const n=inp.dataset.n;log[cur]=log[cur]||{};log[cur][n]=log[cur][n]||{};log[cur][n][inp.dataset.k]=inp.value;saveLog();const p=$('#hlPrayer');if(p)p.innerHTML=hlPrayer()});
+}
 function render(){const d=byDate[cur];renderWeek();const m=$('#main');
  m.innerHTML=`<div class="hero"><span class="eyebrow">${cur===todayISO?'TONIGHT · ':''}${fmt(cur).toUpperCase()}</span><h2>${d.title}</h2>
  <div class="meta"><span class="chip">${d.series}</span><span class="chip">${d.ref}</span></div></div>
- <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="${tab==='devotion'}" data-t="devotion">Devotion</button><button class="tab" role="tab" aria-selected="${tab==='kids'}" data-t="kids">Kids’ page</button></div>
- ${tab==='devotion'?devotion(d):kids(d)}
+ <div class="tabs" role="tablist"><button class="tab" role="tab" aria-selected="${tab==='devotion'}" data-t="devotion">Devotion</button><button class="tab" role="tab" aria-selected="${tab==='kids'}" data-t="kids">Kids’ page</button><button class="tab" role="tab" aria-selected="${tab==='journal'}" data-t="journal">Journal</button></div>
+ ${tab==='devotion'?devotion(d):tab==='kids'?kids(d):journal()}
  <div class="nav"><button class="btn" id="prev" type="button">‹ Previous</button>
  <button class="btn primary ${done[cur]?'is-done':''}" id="doneBtn" type="button">${done[cur]?'Done ✓':'Mark as done'}</button>
  <button class="btn" id="next" type="button">Next ›</button></div>
@@ -76,6 +115,7 @@ function render(){const d=byDate[cur];renderWeek();const m=$('#main');
  const ab=$('#ansBtn');if(ab)ab.onclick=()=>{showAns=!showAns;render()};
  const pk=$('#printKids');if(pk)pk.onclick=()=>doPrint(sheet(d));
  const pd=$('#printDevo');if(pd)pd.onclick=()=>doPrint(devoPrint(d));
+ wireHL(m);wireJournal(m);
  const ws=$('#ws');if(ws)ws.addEventListener('click',e=>{if(e.target.tagName==='TD')e.target.classList.toggle('on')});
 }
 $('#todayBtn').onclick=()=>go(byDate[todayISO]?todayISO:pickStart());
