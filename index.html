@@ -12,7 +12,7 @@
 </head>
 <body>
 <header class="bar"><div class="wrap">
-  <div class="brand"><h1>Family Devotions</h1><button class="today" id="todayBtn" type="button">Today</button></div>
+  <div class="brand"><h1>Family Devotions</h1><div class="hbtns"><button class="today" id="todayBtn" type="button">Today</button><button class="today gear" id="famBtn" type="button" aria-label="Family and sync settings" data-sync="off">⚙︎</button></div></div>
   <div class="weeknav">
     <button class="arrow" id="prevWeek" type="button" aria-label="Previous week">‹</button>
     <nav class="days" id="days" aria-label="Choose a day"></nav>
@@ -21,6 +21,8 @@
 </div></header>
 <main class="wrap" id="main"><p class="note">Loading…</p></main>
 <div id="printArea" aria-hidden="true"></div>
+<script src="weekly.js"></script>
+<script src="sync-config.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
