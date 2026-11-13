@@ -23,7 +23,7 @@ D("2026-11-24",S,"Gideon’s Tiny Army","an older kid","Judges 6:12",[(12,"And t
 "Lord God, thank You for using weak and small people to do Your work, so that You get the glory.","When we feel too small or scared, remind us that You are with us.",
 "God used Gideon and only 300 men with trumpets, jars, and torches to win the battle!",
 ["Gideon was hiding in a [winepress].","The angel called him a mighty [warrior].","God made the army smaller, down to [300].","They hid torches inside clay [jars].","They blew their [trumpets] and shouted."],
-["GIDEON","JARS","TORCHES","TRUMPETS","ANGEL","THREE"],[("Did Gideon feel strong at first?",["Yes","No"],1),("Why did God use only 300 men?",["So He got the glory","He ran out of men"],0)],
+["GIDEON","JARS","TORCHES","TRUMPETS","ANGEL","WINEPRESS"],[("Did Gideon feel strong at first?",["Yes","No"],1),("Why did God use only 300 men?",["So He got the glory","He ran out of men"],0)],
 "Draw a clay jar with a torch inside, and a trumpet.",("Judges 6:12","“The LORD is with you, O mighty man of valor.”"),
 scene(moon(560,56),stars(12,21,(160,480)),person(220,beard=False,arms="mixed",hair="short"),trumpet(250,130),jar(330),jar(390),jar(450),tent(560),label="Coloring picture: Gideon with trumpets and torches in clay jars"))
 
@@ -38,7 +38,7 @@ D("2026-11-25",S,"The One Who Came Back","a K–2nd grader, with help","Luke 17:
 "Jesus healed ten sick men, but only one came back to say thank you!",
 ["[Ten] men were sick.","They had a disease called [leprosy].","Jesus [healed] them all.","Only one came back to say [thank] you.","He was a [Samaritan]."],
 ["THANKS","TEN","HEALED","LEPERS","PRAISE","NINE"],[("How many came back?",["One","Ten"],0),("Who should we thank for good gifts?",["God","Nobody"],0)],
-"Make a list or drawing of ten things you are thankful for.",("Luke 17:15","“He turned back, praising God with a loud voice.”"),
+"Make a list or drawing of ten things you are thankful for.",("Luke 17:15","“…turned back, praising God with a loud voice.”"),
 scene(hills(),person(170,beard=True,arms="open",hair="short"),person(270,beard=True,arms="up",hair="wrap",s=.85),''.join(person(x,beard=b,arms="open",hair=h,s=.6) for x,b,h in [(420,True,"short"),(480,False,"wrap"),(540,True,"curly"),(600,False,"short")]),label="Coloring picture: one healed man thanking Jesus while others walk away"))
 
 D("2026-11-26","Thanksgiving Day","Enter His Gates with Thanksgiving","Mom or Dad","Psalm 100:4–5",[(4,"Enter his gates with thanksgiving, and his courts with praise! Give thanks to him; bless his name!"),(5,"For the LORD is good; his steadfast love endures forever, and his faithfulness to all generations.")],

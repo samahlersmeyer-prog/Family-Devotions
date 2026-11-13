@@ -41,8 +41,13 @@ def old(datafile,picfile,dates,series_fn):
           prayer=d['prayer'],ask=d['ask'],pic=g['PICS'][i],
           kids=dict(lede=k['lede'],blanks=[b.replace('___','___') for b in k['blanks']],ans=a,bank=k['bank'],words=k['words'],grid=gr,cells=cells,
             quiz=[[q,o] for q,o in k['quiz']],qa=k.get('qa',[1,0]),draw=k['draw'],mv=list(k['mv']))))
-old('data.py','pics.py',["2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23"],"Reformation Week")
-old('data2.py','pics2.py',["2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30"],"Alone")
+try:
+    old('data.py','pics.py',["2026-10-19","2026-10-20","2026-10-21","2026-10-22","2026-10-23"],"Reformation Week")
+    old('data2.py','pics2.py',["2026-10-26","2026-10-27","2026-10-28","2026-10-29","2026-10-30"],"Alone")
+except FileNotFoundError:
+    # The legacy sources need files from the original build machine; reuse those finished days from days.json.
+    prev=json.load(open(os.path.join(HERE,'..','days.json')))
+    ALL.extend(d for d in prev if "2026-10-19"<=d['date']<="2026-10-30")
 for f in sorted(glob.glob(os.path.join(HERE,'content','*.py'))): exec(open(f).read())
 ALL.sort(key=lambda d:d['date'])
 dates=[d['date'] for d in ALL]; assert len(dates)==len(set(dates)), [x for x in dates if dates.count(x)>1]

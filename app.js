@@ -150,18 +150,28 @@ function hlPrayer(day,print){const h=highsText(day),l=lowsText(day),r=reqText(da
   return parts.join(' ')}
 
 // ---------- audio (Doxology: Old Hundredth in G) ----------
-let AC=null;
-function ac(){if(!AC){try{if(navigator.audioSession)navigator.audioSession.type='playback'}catch(e){}AC=new (window.AudioContext||window.webkitAudioContext)()}
-  if(AC.state==='suspended')AC.resume();return AC}
-function tone(f,t0,dur,vol){const c=ac(),g=c.createGain(),o=c.createOscillator(),o2=c.createOscillator(),g2=c.createGain();
-  o.type='triangle';o2.type='sine';o.frequency.value=f;o2.frequency.value=f*2;g2.gain.value=.12;o2.connect(g2);g2.connect(g);o.connect(g);g.connect(c.destination);
-  g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(vol,t0+.02);g.gain.exponentialRampToValueAtTime(vol*.55,t0+.35);
-  g.gain.setValueAtTime(vol*.55,t0+Math.max(.36,dur-.06));g.gain.exponentialRampToValueAtTime(.0001,t0+dur+.35);
-  [o,o2].forEach(x=>{x.start(t0);x.stop(t0+dur+.4)})}
+// Notes are rendered once into small WAV clips and played with <audio>. iOS Safari keeps <audio>
+// working on every tap (Web Audio tends to go silent after the first sound), and it ignores the silent switch.
 const HZ={G3:196,B3:246.94,D4:293.66,E4:329.63,Fs4:369.99,G4:392,A4:440,B4:493.88};
-function playNote(){const c=ac(),t=c.currentTime+.05;[HZ.G3,HZ.B3,HZ.D4].forEach(f=>tone(f,t,.9,.09));tone(HZ.G4,t+1.05,1.8,.3)}
-function playLine(){const c=ac();let t=c.currentTime+.05;const b=.55;
-  [['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',1],['A4',1],['B4',2.5]].forEach(([n,l])=>{tone(HZ[n],t,b*l-.04,.28);t+=b*l})}
+function synth(notes,total){const sr=22050,n=Math.ceil(sr*total),buf=new Float32Array(n);
+  for(const [f,t0,dur,vol] of notes){const a=Math.floor(t0*sr),end=Math.min(n,Math.floor((t0+dur+.4)*sr));
+    for(let i=a;i<end;i++){const t=(i-a)/sr;
+      let env=t<.02?t/.02:(t<.35?1-.45*((t-.02)/.33):.55);if(t>dur)env*=Math.exp(-(t-dur)*9);
+      const ph=f*t;buf[i]+=vol*env*(.6366*Math.asin(Math.sin(2*Math.PI*ph))+.12*Math.sin(4*Math.PI*ph))}}
+  const dv=new DataView(new ArrayBuffer(44+n*2)),w=(o,str)=>{for(let k=0;k<str.length;k++)dv.setUint8(o+k,str.charCodeAt(k))};
+  w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
+  dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,buf[i]))*32000,true);
+  return URL.createObjectURL(new Blob([dv],{type:'audio/wav'}))}
+const CLIPS={note:()=>synth([[HZ.G3,0,.9,.18],[HZ.B3,0,.9,.18],[HZ.D4,0,.9,.18],[HZ.G4,1.05,1.8,.55]],3.4),
+  line:()=>{const b=.55,seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',1],['A4',1],['B4',2.5]];let t=.05;const ns=[];
+    for(const [k,l] of seq){ns.push([HZ[k],t,b*l-.04,.5]);t+=b*l}return synth(ns,t+.6)}};
+const audio={};
+function play(name){Object.values(audio).forEach(a=>{a.pause()});
+  if(!audio[name]){audio[name]=new Audio(CLIPS[name]());audio[name].preload='auto'}
+  const a=audio[name];try{a.currentTime=0}catch(e){}const pr=a.play();if(pr&&pr.catch)pr.catch(()=>toast('Tap again to play the note.'))}
+function playNote(){play('note')}
+function playLine(){play('line')}
 
 // ---------- views ----------
 function hymnStep(w){if(!w)return '';const h=w.hymn;return `<section class="step"><h3>Hymn of the week</h3><p class="ref">${esc(h.title)} · ${esc(h.by)}</p><p class="hymn">${h.lines.map(esc).join('<br>')}</p><p class="note">Same hymn all week, so by the end everyone knows it.</p></section>`}
