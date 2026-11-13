@@ -102,7 +102,7 @@ function go(s){cur=s;if(tab==='kids'||tab==='family')tab='devotion';showAns=fals
 function season(s,series){const md=s.slice(5);
   if(/St\. (Stephen|Thomas)|Holy Innocents|Reformation/.test(series))return 'red';
   if(md>='12-24'||md<='01-06')return 'white';
-  if(/^All Saints/.test(series))return 'white';
+  if(/^(All Saints|Baptism of Our Lord|Epiphany|New Year)/.test(series))return 'white';
   if(md>='11-29'||/^Advent|St\. Nicholas/.test(series))return 'blue';
   if(md>='10-25'&&md<='10-31')return 'red';
   return 'green'}
@@ -175,7 +175,7 @@ function playLine(){play('line')}
 
 // ---------- views ----------
 function hymnStep(w){if(!w)return '';const h=w.hymn;return `<section class="step"><h3>Hymn of the week</h3><p class="ref">${esc(h.title)} · ${esc(h.by)}</p><p class="hymn">${h.lines.map(esc).join('<br>')}</p><p class="note">Same hymn all week, so by the end everyone knows it.</p></section>`}
-function catStep(w){if(!w)return '';const c=w.cat;return `<section class="step"><h3>Catechism</h3><p class="ref">Small Catechism · ${esc(c.part)}</p><p class="cat-text"><b>${esc(c.text)}</b></p><p class="rub">What does this mean?</p><p>${esc(c.mean)}</p><p class="note">Say it together each night this week.</p></section>`}
+function catStep(c){if(!c)return '';return `<section class="step"><h3>Catechism</h3><p class="ref">Small Catechism · ${esc(c.part)}</p><p class="cat-text"><b>${esc(c.text)}</b></p><p class="rub">What does this mean?</p><p>${esc(c.mean)}</p><p class="note">Say it together${c.daily?'':' each night this week'}.</p></section>`}
 function readerLine(d){const r=readerFor(d);
   if(!r)return `<p class="rub">Reader: ${esc(d.reader)}.</p>`;
   return `<p class="rub">Tonight’s reader: <b>${esc(r)}</b>${readers().length>1?` <button type="button" class="link" data-a="swapRd">Switch</button>`:''}</p>`}
@@ -186,7 +186,7 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  <section class="step"><h3>Scripture</h3><p class="ref">${d.ref} · ESV</p><p class="scripture">${v}</p>${readerLine(d)}</section>
  <section class="step"><h3>${d.story_title}</h3>${d.story.map(p=>`<p>${p}</p>`).join('')}</section>
  <section class="step"><h3>${d.teach_title}</h3><div class="teach">${d.teach.map(p=>`<p>${p}</p>`).join('')}</div></section>
- ${catStep(w)}
+ ${catStep(d.cat?Object.assign({daily:1},d.cat):(w&&w.cat))}
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
  <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p></section>
@@ -214,7 +214,7 @@ function devoPrint(d){const w=weekly(d.date);const r=readerFor(d);return `<div c
  ${w?`<h2>Hymn: ${esc(w.hymn.title)}</h2><p>${w.hymn.lines.map(esc).join('<br>')}</p>`:''}
  <h2>Scripture: ${d.ref} (ESV)</h2><p>${d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join(' ')}</p><p class="r">Reader: ${r?esc(r):d.reader}.</p>
  <h2>${d.story_title}</h2>${d.story.map(p=>`<p>${p}</p>`).join('')}<h2>${d.teach_title}</h2>${d.teach.map(p=>`<p>${p}</p>`).join('')}
- ${w?`<h2>Catechism: ${esc(w.cat.part)}</h2><p><b>${esc(w.cat.text)}</b></p><p><i>What does this mean?</i> ${esc(w.cat.mean)}</p>`:''}
+ ${(()=>{const c=d.cat||(w&&w.cat);return c?`<h2>Catechism: ${esc(c.part)}</h2><p><b>${esc(c.text)}</b></p><p><i>What does this mean?</i> ${esc(c.mean)}</p>`:''})()}
  <h2>Questions</h2>${d.q.map(([w,t])=>`<p><b>${w}:</b> ${t}</p>`).join('')}<h2>Highs and lows · Doxology</h2>
  <h2>Closing prayer</h2><p>${d.prayer} ${hlPrayer(d.date,true)} ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
 function doPrint(html){$('#printArea').innerHTML=html;window.print()}

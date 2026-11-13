@@ -45,5 +45,18 @@ window.WEEKLY=[
 {start:"2026-12-28",
  hymn:{title:"Joy to the World",by:"Isaac Watts",lines:["Joy to the world, the Lord is come!","Let earth receive her King;","Let every heart prepare Him room,","And heaven and nature sing,","And heaven and nature sing,","And heaven, and heaven, and nature sing."]},
  cat:{part:"The Second Article",text:"And in Jesus Christ, His only Son, our Lord; who was conceived by the Holy Ghost, born of the Virgin Mary; suffered under Pontius Pilate, was crucified, dead, and buried; He descended into hell; the third day He rose again from the dead; He ascended into heaven, and sitteth on the right hand of God the Father Almighty; from thence He shall come to judge the quick and the dead.",
-  mean:"I believe that Jesus Christ, true God, begotten of the Father from eternity, and also true man, born of the Virgin Mary, is my Lord, who has redeemed me, a lost and condemned creature, purchased and won me from all sins, from death, and from the power of the devil; not with gold or silver, but with His holy, precious blood and with His innocent suffering and death; that I may be His own, and live under Him in His kingdom, and serve Him in everlasting righteousness, innocence, and blessedness, even as He is risen from the dead, lives and reigns to all eternity. This is most certainly true."}}
+  mean:"I believe that Jesus Christ, true God, begotten of the Father from eternity, and also true man, born of the Virgin Mary, is my Lord, who has redeemed me, a lost and condemned creature, purchased and won me from all sins, from death, and from the power of the devil; not with gold or silver, but with His holy, precious blood and with His innocent suffering and death; that I may be His own, and live under Him in His kingdom, and serve Him in everlasting righteousness, innocence, and blessedness, even as He is risen from the dead, lives and reigns to all eternity. This is most certainly true."}},
+{start:"2027-01-06",
+ hymn:{title:"As with Gladness Men of Old",by:"William C. Dix",lines:["As with gladness men of old","Did the guiding star behold;","As with joy they hailed its light,","Leading onward, beaming bright;","So, most gracious Lord, may we","Evermore be led to Thee."]},
+ cat:{part:"Baptism",text:"What is Baptism?",
+  mean:"Baptism is not simple water only, but it is the water comprehended in God’s command and connected with God’s Word."}},
+{start:"2027-01-10",
+ hymn:{title:"Children of the Heavenly Father",by:"Carolina Sandell Berg, tr. Ernst W. Olson",lines:["Children of the heavenly Father","Safely in His bosom gather;","Nestling bird nor star in heaven","Such a refuge e’er was given."]},
+ cat:null},
+{start:"2027-01-18",
+ hymn:{title:"Amazing Grace",by:"John Newton",lines:["Amazing grace! how sweet the sound","That saved a wretch like me!","I once was lost, but now am found,","Was blind, but now I see."]},
+ cat:null},
+{start:"2027-01-24",
+ hymn:{title:"What a Friend We Have in Jesus",by:"Joseph M. Scriven",lines:["What a friend we have in Jesus,","All our sins and griefs to bear!","What a privilege to carry","Everything to God in prayer!","O what peace we often forfeit,","O what needless pain we bear,","All because we do not carry","Everything to God in prayer!"]},
+ cat:null}
 ];

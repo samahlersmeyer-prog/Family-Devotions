@@ -39,6 +39,9 @@ The **Kids' page** tab has a coloring picture, fill-in-the-blanks, a word search
 - Nov 23–29: Give Thanks (Thanksgiving)
 - Nov 30 – Dec 20: Advent
 - Dec 21–31: Christmas through New Year's Eve
+- Jan 1–5: Christmas (Jesus' name, out of Egypt, the boy Jesus in the temple)
+- Jan 6–10: Epiphany, through the Baptism of Our Lord
+- Jan 11–31: The Small Catechism: the Ten Commandments, the Creed, and the Lord's Prayer, each with a Bible story
 
 ## Updating
 Content lives in `src/content/*.py`, one file per week. Weekly hymns and catechism parts are in `weekly.js`. Run `python3 src/build.py` to regenerate `days.json`.
