@@ -5,7 +5,10 @@ const FB_CONFIG=window.FB_CONFIG||null;
 const FB_VER='12.19.0';
 
 const $=s=>document.querySelector(s);
-const ls={get(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+// All the owner's GitHub Pages apps share one localStorage, so new keys get an "fd:" prefix.
+// family/log/done keep their original names so existing journals carry over.
+const LEGACY=['family','log','done'];const K=k=>LEGACY.includes(k)?k:'fd:'+k;
+const ls={get(k){try{return JSON.parse(localStorage.getItem(K(k)))}catch(e){return null}},set(k,v){try{localStorage.setItem(K(k),JSON.stringify(v))}catch(e){}},del(k){try{localStorage.removeItem(K(k))}catch(e){}}};
 const clone=o=>JSON.parse(JSON.stringify(o));
 const KEYS=['family','log','done','prayers','known','noread','rd'];
 const DEF={family:[],log:{},done:{},prayers:{},known:{},noread:[],rd:{}};
