@@ -1,10 +1,12 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // One doc per family PIN (doc id = SHA-256 of the PIN). Docs can be read
-    // and written only by someone who knows the id; nothing can be listed.
+    // One doc per family PIN (doc id = SHA-256 of the PIN).
+    // Readable/writable only by someone who knows the id; nothing can be listed or deleted.
     match /families/{fid} {
-      allow get, create, update: if fid.size() == 64 && request.resource.size() < 900000 || (fid.size() == 64 && request.method == 'get');
+      allow get: if fid.size() == 64;
+      allow create, update: if fid.size() == 64
+        && request.resource.data.keys().hasOnly(['family', 'log', 'done', 'prayers', 'known', 'noread', 'rd']);
       allow list, delete: if false;
     }
   }
