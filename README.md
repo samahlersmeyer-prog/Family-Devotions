@@ -8,13 +8,14 @@ Nightly Lutheran (LCMS) family devotions with ESV Scripture and a printable kids
 1. Invocation
 2. Hymn of the week
 3. Scripture (ESV), with a rotating reader
-4. Story
+4. Story, opened with a C.S. Lewis–style “Picture this” (a picture or a Narnia scene, retold in our own words)
 5. Short teaching
-6. Small Catechism part of the week
-7. Questions for K–2nd, 3rd–5th, and older kids
-8. Highs, lows, and prayer requests
-9. Doxology (tap ♪ for the starting note)
-10. Closing prayer and the Lord's Prayer
+6. Lewis line (on many nights): one short, verified C.S. Lewis quote tied to the night
+7. Small Catechism part of the week
+8. Questions for K–2nd, 3rd–5th, and older kids
+9. Highs, lows, and prayer requests
+10. Doxology (tap ♪ for the starting note)
+11. Closing prayer and the Lord's Prayer
 
 Highs, lows, and standing prayer requests are woven into the closing prayer automatically.
 
@@ -44,6 +45,6 @@ The **Kids' page** tab has a coloring picture, fill-in-the-blanks, a word search
 - Jan 11–31: The Small Catechism: the Ten Commandments, the Creed, and the Lord's Prayer, each with a Bible story
 
 ## Updating
-Content lives in `src/content/*.py`, one file per week. Weekly hymns and catechism parts are in `weekly.js`. Run `python3 src/build.py` to regenerate `days.json`.
+Content lives in `src/content/*.py`, one file per week. Weekly hymns and catechism parts are in `weekly.js`. The C.S. Lewis “Picture this” openers and Lewis lines are in `src/lewis.py` (keyed by date; quotes kept short and checked, read through an LCMS lens). Run `python3 src/build.py` to regenerate `days.json`.
 
 Scripture quotations are from the ESV® Bible (The Holy Bible, English Standard Version®), copyright © 2001 by Crossway, a publishing ministry of Good News Publishers. Used by permission. All rights reserved.

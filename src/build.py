@@ -49,6 +49,11 @@ except FileNotFoundError:
     prev=json.load(open(os.path.join(HERE,'..','days.json')))
     ALL.extend(d for d in prev if "2026-10-19"<=d['date']<="2026-10-30")
 for f in sorted(glob.glob(os.path.join(HERE,'content','*.py'))): exec(open(f).read())
+exec(open(os.path.join(HERE,'lewis.py')).read())
+for d in ALL:
+    if d['date'] in LEWIS:
+        pic,line=LEWIS[d['date']]; d['lewis']=dict(pic=pic)
+        if line: d['lewis'].update(q=line[0],src=line[1],tie=line[2])
 ALL.sort(key=lambda d:d['date'])
 dates=[d['date'] for d in ALL]; assert len(dates)==len(set(dates)), [x for x in dates if dates.count(x)>1]
 out=sys.argv[1] if len(sys.argv)>1 else os.path.join(HERE,'..')

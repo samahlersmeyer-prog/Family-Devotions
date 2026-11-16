@@ -179,3 +179,7 @@ label.btn{display:inline-block}
 [hidden]{display:none!important}
 .nav{flex-wrap:nowrap}
 @media (max-width:420px){.nav .btn{padding:.55rem .7rem;font-size:.95rem}}
+
+.lw-pic{border-left:3px solid var(--gold);padding:.15rem 0 .15rem .8rem;font-style:italic;color:var(--ink)}
+.lw-tag{display:block;font-style:normal;font-family:var(--display);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:.15rem}
+.lewis blockquote{margin:.3rem 0;padding:.6rem .9rem;border-radius:12px;background:var(--green-soft);font-family:var(--display);font-size:1.05rem;line-height:1.45}

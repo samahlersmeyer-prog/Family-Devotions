@@ -179,13 +179,16 @@ function catStep(c){if(!c)return '';return `<section class="step"><h3>Catechism<
 function readerLine(d){const r=readerFor(d);
   if(!r)return `<p class="rub">Reader: ${esc(d.reader)}.</p>`;
   return `<p class="rub">Tonight’s reader: <b>${esc(r)}</b>${readers().length>1?` <button type="button" class="link" data-a="swapRd">Switch</button>`:''}</p>`}
+function lwPic(d){return d.lewis&&d.lewis.pic?`<p class="lw-pic"><span class="lw-tag">Picture this</span>${d.lewis.pic}</p>`:''}
+function lwLine(d){const l=d.lewis;if(!l||!l.q)return '';return `<section class="step lewis"><h3>Lewis line</h3><blockquote>“${l.q}”</blockquote><p class="ref">C.S. Lewis, <i>${l.src}</i></p><p class="note">${l.tie}</p></section>`}
 function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join(' ');const w=weekly(d.date);
  return `<div class="steps">
  <section class="step"><h3>Invocation</h3><p>In the name of the Father and of the ✠ Son and of the Holy Spirit. Amen.</p><p>Lord Jesus, thank You for bringing us together tonight. Open our ears to hear Your Word. Amen.</p></section>
  ${hymnStep(w)}
  <section class="step"><h3>Scripture</h3><p class="ref">${d.ref} · ESV</p><p class="scripture">${v}</p>${readerLine(d)}</section>
- <section class="step"><h3>${d.story_title}</h3>${d.story.map(p=>`<p>${p}</p>`).join('')}</section>
+ <section class="step"><h3>${d.story_title}</h3>${lwPic(d)}${d.story.map(p=>`<p>${p}</p>`).join('')}</section>
  <section class="step"><h3>${d.teach_title}</h3><div class="teach">${d.teach.map(p=>`<p>${p}</p>`).join('')}</div></section>
+ ${lwLine(d)}
  ${catStep(d.cat?Object.assign({daily:1},d.cat):(w&&w.cat))}
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
@@ -213,7 +216,8 @@ function devoPrint(d){const w=weekly(d.date);const r=readerFor(d);return `<div c
  <h2>Invocation</h2><p>In the name of the Father and of the ✠ Son and of the Holy Spirit. Amen.</p>
  ${w?`<h2>Hymn: ${esc(w.hymn.title)}</h2><p>${w.hymn.lines.map(esc).join('<br>')}</p>`:''}
  <h2>Scripture: ${d.ref} (ESV)</h2><p>${d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join(' ')}</p><p class="r">Reader: ${r?esc(r):d.reader}.</p>
- <h2>${d.story_title}</h2>${d.story.map(p=>`<p>${p}</p>`).join('')}<h2>${d.teach_title}</h2>${d.teach.map(p=>`<p>${p}</p>`).join('')}
+ <h2>${d.story_title}</h2>${d.lewis&&d.lewis.pic?`<p><i>Picture this:</i> ${d.lewis.pic}</p>`:''}${d.story.map(p=>`<p>${p}</p>`).join('')}<h2>${d.teach_title}</h2>${d.teach.map(p=>`<p>${p}</p>`).join('')}
+ ${d.lewis&&d.lewis.q?`<h2>Lewis line</h2><p>“${d.lewis.q}” (C.S. Lewis, <i>${d.lewis.src}</i>)</p>`:''}
  ${(()=>{const c=d.cat||(w&&w.cat);return c?`<h2>Catechism: ${esc(c.part)}</h2><p><b>${esc(c.text)}</b></p><p><i>What does this mean?</i> ${esc(c.mean)}</p>`:''})()}
  <h2>Questions</h2>${d.q.map(([w,t])=>`<p><b>${w}:</b> ${t}</p>`).join('')}<h2>Highs and lows · Doxology</h2>
  <h2>Closing prayer</h2><p>${d.prayer} ${hlPrayer(d.date,true)} ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
