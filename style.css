@@ -183,3 +183,19 @@ label.btn{display:inline-block}
 .lw-pic{border-left:3px solid var(--gold);padding:.15rem 0 .15rem .8rem;font-style:italic;color:var(--ink)}
 .lw-tag{display:block;font-style:normal;font-family:var(--display);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--gold);margin-bottom:.15rem}
 .lewis blockquote{margin:.3rem 0;padding:.6rem .9rem;border-radius:12px;background:var(--green-soft);font-family:var(--display);font-size:1.05rem;line-height:1.45}
+/* ---- Doxology in four parts ---- */
+.dox-parts{margin-top:.6rem;border-top:1px dashed var(--line);padding-top:.5rem}
+.dox-parts summary{font-family:var(--display);font-weight:600;color:var(--green);cursor:pointer;padding:.2rem 0}
+.vbtn.on{background:var(--green);border-color:var(--green);color:var(--bg)}
+.dox-soft{display:flex;align-items:center;gap:.4rem;font-size:.92rem;color:var(--muted);margin:.2rem 0 .4rem}
+.dox-score{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.3rem .2rem;display:grid;gap:.1rem}
+.dox-sys{display:block;width:100%;height:auto}
+.dox-sys .sl{stroke:#222;stroke-width:.8}.dox-sys .sl.thick{stroke-width:3}
+.dox-sys .stem{stroke:#222;stroke-width:1}
+.dox-sys .nh{fill:#222;stroke:#222;stroke-width:1}.dox-sys .nh.half{fill:#fff;stroke-width:1.6}
+.dox-sys .clef{font-family:"Apple Symbols","Noto Music","Segoe UI Symbol","Bravura Text",serif;font-size:40px;fill:#222}
+.dox-sys .clef.bass{font-size:30px}
+.dox-sys .acc{font-size:13px;fill:#222}
+.dox-sys .lyr{font-family:Georgia,serif;font-size:11.5px;text-anchor:middle;fill:#222}
+.dox-parts[data-part=S] .v-S,.dox-parts[data-part=A] .v-A,.dox-parts[data-part=T] .v-T,.dox-parts[data-part=B] .v-B{stroke:#b7802a;fill:#b7802a}
+.dox-parts[data-part=S] .nh.half.v-S,.dox-parts[data-part=A] .nh.half.v-A,.dox-parts[data-part=T] .nh.half.v-T,.dox-parts[data-part=B] .nh.half.v-B{fill:#fff}
