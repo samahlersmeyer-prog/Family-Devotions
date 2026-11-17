@@ -157,7 +157,7 @@ function synth(notes,total){const sr=22050,n=Math.ceil(sr*total),buf=new Float32
   for(const [f,t0,dur,vol] of notes){const a=Math.floor(t0*sr),end=Math.min(n,Math.floor((t0+dur+.4)*sr));
     for(let i=a;i<end;i++){const t=(i-a)/sr;
       let env=t<.02?t/.02:(t<.35?1-.45*((t-.02)/.33):.55);if(t>dur)env*=Math.exp(-(t-dur)*9);
-      const ph=f*t;buf[i]+=vol*env*(.6366*Math.asin(Math.sin(2*Math.PI*ph))+.12*Math.sin(4*Math.PI*ph))}}
+      const ph=f*t;const lo=f<230?.28:0;buf[i]+=vol*env*(.6366*Math.asin(Math.sin(2*Math.PI*ph))+.12*Math.sin(4*Math.PI*ph)+lo*(Math.sin(4*Math.PI*ph)+.6*Math.sin(6*Math.PI*ph)))}}
   const dv=new DataView(new ArrayBuffer(44+n*2)),w=(o,str)=>{for(let k=0;k<str.length;k++)dv.setUint8(o+k,str.charCodeAt(k))};
   w(0,'RIFF');dv.setUint32(4,36+n*2,true);w(8,'WAVE');w(12,'fmt ');dv.setUint32(16,16,true);dv.setUint16(20,1,true);dv.setUint16(22,1,true);
   dv.setUint32(24,sr,true);dv.setUint32(28,sr*2,true);dv.setUint16(32,2,true);dv.setUint16(34,16,true);w(36,'data');dv.setUint32(40,n*2,true);
@@ -167,11 +167,15 @@ const CLIPS={note:()=>synth([[HZ.G3,0,.9,.18],[HZ.B3,0,.9,.18],[HZ.D4,0,.9,.18],
   line:()=>{const b=.55,seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',1],['A4',1],['B4',2.5]];let t=.05;const ns=[];
     for(const [k,l] of seq){ns.push([HZ[k],t,b*l-.04,.5]);t+=b*l}return synth(ns,t+.6)}};
 const audio={};
-function play(name){Object.values(audio).forEach(a=>{a.pause()});
-  if(!audio[name]){audio[name]=new Audio(CLIPS[name]());audio[name].preload='auto'}
+function stopAll(){Object.values(audio).forEach(a=>{a.pause()})}
+function play(name,make){stopAll();
+  if(!audio[name]){audio[name]=new Audio((make||CLIPS[name])());audio[name].preload='auto'}
   const a=audio[name];try{a.currentTime=0}catch(e){}const pr=a.play();if(pr&&pr.catch)pr.catch(()=>toast('Tap again to play the note.'))}
 function playNote(){play('note')}
 function playLine(){play('line')}
+let doxOpen=false,doxPart='',doxSoft=true;
+function playDox(v){doxPart=v;const box=$('.dox-parts');if(box){box.dataset.part=v;box.querySelectorAll('.vbtn').forEach(b=>{const on=b.dataset.v===v;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
+  play(`dox-${v}-${doxSoft?1:0}`,()=>doxClip(v,doxSoft,synth))}
 
 // ---------- views ----------
 function hymnStep(w){if(!w)return '';const h=w.hymn;return `<section class="step"><h3>Hymn of the week</h3><p class="ref">${esc(h.title)} · ${esc(h.by)}</p><p class="hymn">${h.lines.map(esc).join('<br>')}</p><p class="note">Same hymn all week, so by the end everyone knows it.</p></section>`}
@@ -192,7 +196,7 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  ${catStep(d.cat?Object.assign({daily:1},d.cat):(w&&w.cat))}
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
- <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p></section>
+ <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${doxParts(doxOpen,doxPart,doxSoft)}</section>
  <section class="step"><h3>Closing prayer</h3><p>${d.prayer} <span id="hlPrayer" class="ins">${hlPrayer(cur)}</span> ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
  </div>`}
 function kids(d){const k=d.kids;
@@ -312,6 +316,7 @@ const ACT={
  ans:()=>{showAns=!showAns;render()},
  printKids:()=>doPrint(sheet(byDate[cur])),printDevo:()=>doPrint(devoPrint(byDate[cur])),
  note:()=>playNote(),line:()=>playLine(),
+ dox:b=>playDox(b.dataset.v),doxStop:()=>{stopAll();doxPart='';const box=$('.dox-parts');if(box){box.dataset.part='';box.querySelectorAll('.vbtn').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed',false)})}},
  swapRd:()=>{const r=readers(),c=readerFor(byDate[cur]);put(['rd',cur],r[(r.indexOf(c)+1)%r.length]);render()},
  editFam:()=>{editFam=true;render()},famDone:()=>{editFam=false;render()},
  rmFam:b=>{const f=S.family.slice();f.splice(+b.dataset.i,1);put(['family'],f);render()},
@@ -335,7 +340,9 @@ main.addEventListener('click',e=>{const ws=e.target.closest('#ws td');if(ws){ws.
  const b=e.target.closest('[data-a]');if(b&&ACT[b.dataset.a]){if(b.tagName==='BUTTON')e.preventDefault();ACT[b.dataset.a](b,e)}});
 main.addEventListener('input',e=>{const t=e.target;
  if(t.matches('.hlrow input')){const n=t.dataset.n,k=t.dataset.k;put(['log',cur,n,k],t.value||null,{slow:true});const p=$('#hlPrayer');if(p)p.innerHTML=hlPrayer(cur)}});
+main.addEventListener('toggle',e=>{if(e.target.matches&&e.target.matches('.dox-parts'))doxOpen=e.target.open},true);
 main.addEventListener('change',e=>{const t=e.target;
+ if(t.id==='doxSoft'){doxSoft=t.checked;if(doxPart)playDox(doxPart)}
  if(t.matches('.ans-ck input[data-d]')){put(['log',t.dataset.d,t.dataset.n,'ok'],t.checked||null);t.closest('p').classList.toggle('okd',t.checked)}
  if(t.matches('[data-known]')){put(['known',t.dataset.known],t.checked||null);t.closest('.verse').classList.toggle('known',t.checked);const v=verseList();const tb=main.querySelector('.toolbar b');if(tb)tb.textContent=v.filter(x=>S.known[x.r]).length}
  if(t.id==='pKind'){$('#pUntilWrap').hidden=t.value!=='thru'}
