@@ -196,7 +196,7 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  ${catStep(d.cat?Object.assign({daily:1},d.cat):(w&&w.cat))}
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
- <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${doxParts(doxOpen,doxPart,doxSoft)}</section>
+ <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${typeof doxParts==='function'?doxParts(doxOpen,doxPart,doxSoft):''}</section>
  <section class="step"><h3>Closing prayer</h3><p>${d.prayer} <span id="hlPrayer" class="ins">${hlPrayer(cur)}</span> ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
  </div>`}
 function kids(d){const k=d.kids;
