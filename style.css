@@ -191,11 +191,12 @@ label.btn{display:inline-block}
 .dox-score{background:#fff;border:1px solid var(--line);border-radius:12px;padding:.3rem .2rem;display:grid;gap:.1rem}
 .dox-sys{display:block;width:100%;height:auto}
 .dox-sys .sl{stroke:#222;stroke-width:.8}.dox-sys .sl.thick{stroke-width:3}
-.dox-sys .stem{stroke:#222;stroke-width:1}
+.dox-sys .stem{stroke:#222;stroke-width:1}.dox-sys .slur{fill:none;stroke:#222;stroke-width:1}
 .dox-sys .nh{fill:#222;stroke:#222;stroke-width:1}.dox-sys .nh.half{fill:#fff;stroke-width:1.6}
 .dox-sys .clef{font-family:"Apple Symbols","Noto Music","Segoe UI Symbol","Bravura Text",serif;font-size:40px;fill:#222}
 .dox-sys .clef.bass{font-size:30px}
 .dox-sys .acc{font-size:13px;fill:#222}
 .dox-sys .lyr{font-family:Georgia,serif;font-size:11.5px;text-anchor:middle;fill:#222}
 .dox-parts[data-part=S] .v-S,.dox-parts[data-part=A] .v-A,.dox-parts[data-part=T] .v-T,.dox-parts[data-part=B] .v-B{stroke:#b7802a;fill:#b7802a}
+.dox-parts[data-part=S] .slur.v-S,.dox-parts[data-part=A] .slur.v-A,.dox-parts[data-part=T] .slur.v-T,.dox-parts[data-part=B] .slur.v-B{fill:none}
 .dox-parts[data-part=S] .nh.half.v-S,.dox-parts[data-part=A] .nh.half.v-A,.dox-parts[data-part=T] .nh.half.v-T,.dox-parts[data-part=B] .nh.half.v-B{fill:#fff}
