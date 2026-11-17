@@ -8,10 +8,10 @@ const DOX={
   ['Praise','Him','a-','bove,','ye','heav’n-','ly','host;'],
   ['Praise','Fa-','ther,','Son,','and','Ho-','ly','Ghost.','A-','men.']],
  parts:{
- S:['G4 G4 Fs4 E4 D4 G4 A4 B4', 'B4 B4 B4 A4 G4 C5 B4 A4', 'G4 A4 B4 A4 G4 E4 Fs4 G4', 'D4 G4 Fs4 E4 D4 G4 A4 G4 G4 G4'],
- A:['D4 E4 D4 C4 D4 B3 D4 D4', 'D4 D4 D4 D4 B3 C4 D4 D4', 'D4 D4 D4 E4 E4 E4 D4 D4', 'D4 B3 D4 B3 D4 B3 D4 B3 C4 B3'],
- T:['B3 B3 B3 G3 G3 G3 Fs3 G3', 'G3 G3 G3 Fs3 G3 G3 G3 Fs3', 'B3 A3 G3 E3 G3 A3 A3 B3', 'G3 G3 A3 G3 G3 G3 Fs3 D3 E3 D3'],
- B:['G3 E3 B2 C3 B2 E3 D3 G2', 'G2 B2 D3 D3 E3 E3 D3 D3', 'G2 Fs2 G2 C3 C3 C3 D3 G3', 'B2 E3 D3 E3 B2 E3 D3 G2 C3 G2']},
+ S:['G4 G4 Fs4 E4 D4 G4 A4 B4', 'B4 B4 B4 A4 G4 C5 B4 A4', 'G4 A4 B4 A4 G4 E4 Fs4 G4', 'D5 B4 G4 A4 C5 B4 A4 G4 G4 G4'],
+ A:['D4 E4 D4 C4 D4 B3 D4 D4', 'D4 D4 D4 D4 B3 C4 D4 D4', 'D4 D4 D4 E4 E4 E4 D4 D4', 'D4 E4 D4 D4 E4 D4 D4 B3 C4 B3'],
+ T:['B3 B3 B3 G3 G3 G3 Fs3 G3', 'G3 G3 G3 Fs3 G3 G3 G3 Fs3', 'B3 A3 G3 E3 G3 A3 A3 B3', 'G3 G3 G3 Fs3 G3 G3 Fs3 D3 E3 D3'],
+ B:['G3 E3 B2 C3 B2 E3 D3 G2', 'G2 B2 D3 D3 E3 E3 D3 D3', 'G2 Fs2 G2 C3 C3 C3 D3 G3', 'B2 E3 B2 D3 C3 D3 D3 G2 C3 G2']},
  names:{S:'Soprano',A:'Alto',T:'Tenor',B:'Bass'},
  hint:{S:'the melody',A:'a lower harmony for women and kids',T:'a higher part for men',B:'the lowest part for men'}
 };
@@ -19,7 +19,8 @@ const DOX={
 const DOX_STEP={C:0,D:1,E:2,F:3,G:4,A:5,B:6},DOX_SEMI={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
 const doxStep=n=>(+n.slice(-1))*7+DOX_STEP[n[0]];               // diatonic position (C4 = 28)
 const doxHz=n=>{const m=12*(+n.slice(-1)+1)+DOX_SEMI[n[0]]+(n[1]==='s'?1:0);return 440*Math.pow(2,(m-69)/12)};
-const doxLong=(li,i,n)=>i===0||i===n-1||(li===3&&i>=8);      // half notes: first and last of each line, and the Amen
+// Beats: half notes on the first and last syllable of each line; the Amen is two whole notes.
+const doxBeats=(li,i,n)=>li===3&&i>=8?4:(i===0||i===n-1||(li===3&&i===7))?2:1;
 
 // ---------- notation ----------
 function doxSystem(li){
@@ -37,14 +38,14 @@ function doxSystem(li){
    return o+`<ellipse class="nh ${cls}${long?' half':''}" cx="${x}" cy="${y}" rx="4.7" ry="3.4" transform="rotate(-20 ${x} ${y})"/>`};
  const stem=(x,y,up,cls)=>`<line class="stem ${cls}" x1="${up?x+4.3:x-4.3}" x2="${up?x+4.3:x-4.3}" y1="${y}" y2="${up?y-27:y+27}"/>`;
  const P={};for(const v of 'SATB')P[v]=DOX.parts[v][li].split(' ');
- for(let i=0;i<n;i++){const x=X0+sp*(i+.5),long=doxLong(li,i,n);
+ for(let i=0;i<n;i++){const x=X0+sp*(i+.5),bt=doxBeats(li,i,n),long=bt>=2,whole=bt===4;
    // treble: soprano (stem up) + alto (stem down); bass: tenor (stem up) + bass (stem down)
    for(const [hi,lo,y,mid] of [['S','A',yT,28],['T','B',yB,28]]){
      const dh=doxStep(P[hi][i]),dl=doxStep(P[lo][i]);
      const led=d=>{const L=[];if(y===yT){for(let k=28;k>=d;k-=2)L.push(y(k));for(let k=40;k<=d;k+=2)L.push(y(k))}else{for(let k=28;k<=d;k+=2)L.push(y(k));for(let k=16;k>=d;k-=2)L.push(y(k))}return L};
      if(dh===dl)s+=head(x,y(dh),dh,long,`v-${hi} v-${lo}`,led(dh));
      else{s+=head(x,y(dh),dh,long,`v-${hi}`,led(dh));s+=head(x,y(dl),dl,long,`v-${lo}`,led(dl))}
-     s+=stem(x,y(dh),true,`v-${hi}`)+stem(x,y(dl),false,`v-${lo}`)}
+     if(!whole)s+=stem(x,y(dh),true,`v-${hi}`)+stem(x,y(dl),false,`v-${lo}`)}
    const w=DOX.lyrics[li][i]||'';s+=`<text class="lyr" x="${x}" y="${T0+87}">${w}</text>`}
  return s+'</svg>'}
 
@@ -60,9 +61,9 @@ function doxParts(open,part,soft){
 // ---------- audio ----------
 function doxClip(part,soft,synth){const b=.6,notes=[];let t=.1;
  for(let li=0;li<4;li++){const n=DOX.parts.S[li].split(' ').length;
-  for(let i=0;i<n;i++){const beats=doxLong(li,i,n)?(li===3&&i===n-1?3:2):1;
+  for(let i=0;i<n;i++){const beats=doxBeats(li,i,n);
    for(const v of 'SATB'){const vol=part==='all'?.24:(v===part?.5:(soft?.08:0));
      if(vol)notes.push([doxHz(DOX.parts[v][li].split(' ')[i]),t,b*beats-.05,vol])}
-   t+=b*beats}
+   t+=b*beats;if(li===3&&i===7)t+=b*.5}
   t+=b}                                                      // a breath between lines
  return synth(notes,t+.4)}
