@@ -139,6 +139,8 @@ label.btn{display:inline-block}
 .link.small{font-size:.85rem}
 .pill{display:inline-block;font-family:var(--display);font-size:.82rem;background:var(--green-soft);color:var(--green);border-radius:999px;padding:.05rem .6rem;margin:.1rem 0}
 .ins{color:inherit}
+.plead{margin:.5rem 0 .15rem;font-weight:600}
+.pbul{margin:0 0 .4rem;padding-left:1.3rem}.pbul li{margin:.2rem 0}
 .tune{display:flex;gap:.4rem;flex-wrap:wrap;margin:.1rem 0 .3rem}
 .cat-text{font-size:1.1rem}
 /* ---- Highs/lows ---- */
