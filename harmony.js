@@ -69,7 +69,7 @@ function doxParts(open,part,soft){
  <p class="note">The setting from <i>The Lutheran Hymnal</i> (1941), as in LSB 805, with the Amen held longer. Top staff: soprano (stems up) and alto (stems down). Bottom staff: tenor (stems up) and bass (stems down). Kids can sing any part an octave higher.</p></details>`}
 
 // ---------- audio ----------
-function doxClip(part,soft,synth){const b=.82,notes=[];let t=.1;
+function doxClip(part,soft,synth){const b=.71,notes=[];let t=.1;
  for(let li=0;li<4;li++){if(li)t+=b*4;   // rest between lines
   const bt=DOX.beats[li],P={};for(const v of 'SATB')P[v]=doxSlots(v,li);
   for(let i=0;i<bt.length;i++){if(li===3&&i===8)t+=b*.5;      // a breath before the Amen

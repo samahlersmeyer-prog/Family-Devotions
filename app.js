@@ -158,7 +158,7 @@ function synth(notes,total){const sr=22050,n=Math.ceil(sr*total),buf=new Float32
   for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,buf[i]))*32000,true);
   return URL.createObjectURL(new Blob([dv],{type:'audio/wav'}))}
 const CLIPS={note:()=>synth([[HZ.G3,0,.9,.18],[HZ.B3,0,.9,.18],[HZ.D4,0,.9,.18],[HZ.G4,1.05,1.8,.55]],3.4),
-  line:()=>{const b=.82,seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
+  line:()=>{const b=.71,seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
     for(const [k,l] of seq){ns.push([HZ[k],t,b*l-.04,.5]);t+=b*l}return synth(ns,t+.6)}};
 const audio={};
 function stopAll(){Object.values(audio).forEach(a=>{a.pause()})}
