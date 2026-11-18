@@ -124,30 +124,24 @@ const poss=o=>andList(o.map(esc))+'’s';
 function groupItems(day,k){const e=S.log[day]||{};const who=S.family.filter(n=>e[n]&&items(e[n][k]).length);const m=new Map();
   who.forEach(n=>items(e[n][k]).forEach(t=>{const key=norm(t);if(!m.has(key))m.set(key,{t,owners:[]});const o=m.get(key);if(!o.owners.includes(n))o.owners.push(n)}));
   return {list:[...m.values()],who}}
-function highsText(day){const {list,who}=groupItems(day,'h');if(!list.length)return '';
-  const shared=x=>x.owners.length>=3||(x.owners.length>1&&x.owners.length===who.length);const out=[],groups=new Map();
-  list.forEach(x=>{let t=esc(x.t);
-    if(/^my\s/i.test(x.t)){out.push({s:(shared(x)?'our ':poss(x.owners)+' ')+t.replace(/^my\s/i,'')});return}
-    if(shared(x)){out.push({s:ARTS.test(x.t)?t:'today’s '+t});return}
-    if(ARTS.test(x.t)){out.push({s:`${t} for ${andList(x.owners.map(esc))}`});return}
-    const key=x.owners.join('|');if(groups.has(key))groups.get(key).items.push(t);else{const g={owners:x.owners,items:[t]};groups.set(key,g);out.push({g})}});
-  out.sort((a,b)=>(b.s&&!a.s)-(a.s&&!b.s));
-  return 'Thank You for '+andList(out.map(o=>o.g?poss(o.g.owners)+' '+andList(o.g.items):o.s))+'.'}
-function lowsText(day){const {list,who}=groupItems(day,'l');if(!list.length)return '';const groups=new Map(),out=[];
-  list.forEach(x=>{const t=esc(x.t.replace(/^my\s/i,''));const key=x.owners.join('|');if(groups.has(key))groups.get(key).items.push(t);else{const g={owners:x.owners,items:[t]};groups.set(key,g);out.push(g)}});
-  out.sort((a,b)=>b.owners.length-a.owners.length);
-  return 'Please help '+andList(out.map(g=>`${g.owners.length>2&&g.owners.length===who.length?'all of us':andList(g.owners.map(esc))} with ${andList(g.items)}`))+'.'}
 function activeReqs(day){return Object.entries(S.prayers).filter(([,r])=>r&&r.t&&(r.added||'')<=day&&!(r.ans&&r.ans<day)&&!(r.kind==='thru'&&r.until&&r.until<day)
   )
   .sort((a,b)=>((b[1].kind==='ongoing')-(a[1].kind==='ongoing'))||((a[1].added||'')<(b[1].added||'')?-1:1))}
-const reqPhrase=r=>{if(!r.who)return esc(r.t);const its=items(r.t).map(t=>esc(t.replace(/^my\s/i,'')));return ARTS.test(r.t)?`${andList(its)} for ${esc(r.who)}`:`${esc(r.who)}’s ${andList(its)}`};
-const reqLabel=r=>r.who?`${esc(r.who)}: ${esc(r.t)}`:esc(r.t);
-function reqText(day){const act=activeReqs(day).filter(([,r])=>r.src!==day||r.ans===day);const thanks=act.filter(([,r])=>r.ans===day).map(([,r])=>reqPhrase(r));const asks=act.filter(([,r])=>r.ans!==day).map(([,r])=>reqPhrase(r));
-  return [thanks.length?`Thank You for answering our prayer${thanks.length>1?'s':''} for ${andList(thanks)}.`:'',asks.length?`We also pray for ${andList(asks)}.`:''].filter(Boolean).join(' ')}
-function hlPrayer(day,print){const h=highsText(day),l=lowsText(day),r=reqText(day);const blank=t=>print?'______':`<span class="blank">${t}</span>`;
-  const parts=[h||(S.family.length?`Thank You for ${blank('(today’s highs)')}.`:''),l||(S.family.length?`Please help with ${blank('(today’s lows)')}.`:''),r].filter(Boolean);
-  if(!S.family.length&&!r)return `Thank You for ${blank('(the highs)')}. Please help with ${blank('(the lows)')}.`;
-  return parts.join(' ')}
+// Closing-prayer highs/lows/requests as short bulleted lists: easier to read aloud than one long sentence.
+const ownerLabel=(o,who)=>o.length>2&&o.length===who.length?'All of us':andList(o.map(esc));
+function hlGroups(day,k){const {list,who}=groupItems(day,k);const groups=new Map(),out=[];
+  list.forEach(x=>{const t=esc(x.t.replace(/^my\s/i,''));const key=x.owners.join('|');if(groups.has(key))groups.get(key).items.push(t);else{const g={owners:x.owners,items:[t]};groups.set(key,g);out.push(g)}});
+  out.sort((a,b)=>b.owners.length-a.owners.length);
+  return out.map(g=>`<li><b>${ownerLabel(g.owners,who)}</b> — ${g.items.join(', ')}</li>`)}
+const reqLi=r=>`<li>${r.who?`<b>${esc(r.who)}</b> — ${esc(r.t.replace(/^my\s/i,''))}`:esc(r.t)}</li>`;
+function hlPrayer(day,print){const blank=t=>print?'______':`<span class="blank">${t}</span>`;
+  const act=activeReqs(day).filter(([,r])=>r.src!==day||r.ans===day);
+  const thanks=act.filter(([,r])=>r.ans===day).map(([,r])=>reqLi(r)),asks=act.filter(([,r])=>r.ans!==day).map(([,r])=>reqLi(r));
+  let hi=hlGroups(day,'h'),lo=hlGroups(day,'l');
+  if(!hi.length&&(S.family.length||!asks.length))hi=[`<li>${blank('(today’s highs)')}</li>`];
+  if(!lo.length&&(S.family.length||!asks.length))lo=[`<li>${blank('(today’s lows)')}</li>`];
+  const sec=(lead,lis)=>lis.length?`<p class="plead">${lead}</p><ul class="pbul">${lis.join('')}</ul>`:'';
+  return sec('Thank You for…',hi)+sec(`Thank You for answering our prayer${thanks.length>1?'s':''} for…`,thanks)+sec('Please help…',lo)+sec('We also pray for…',asks)}
 
 // ---------- audio (Doxology: Old Hundredth in G) ----------
 // Notes are rendered once into small WAV clips and played with <audio>. iOS Safari keeps <audio>
@@ -197,7 +191,7 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
  <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${typeof doxParts==='function'?doxParts(doxOpen,doxPart,doxSoft):''}</section>
- <section class="step"><h3>Closing prayer</h3><p>${d.prayer} <span id="hlPrayer" class="ins">${hlPrayer(cur)}</span> ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
+ <section class="step"><h3>Closing prayer</h3><p>${d.prayer}</p><div id="hlPrayer" class="ins">${hlPrayer(cur)}</div><p>${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
  </div>`}
 function kids(d){const k=d.kids;
  return `<div class="steps">
@@ -224,7 +218,7 @@ function devoPrint(d){const w=weekly(d.date);const r=readerFor(d);return `<div c
  ${d.lewis&&d.lewis.q?`<h2>Lewis line</h2><p>“${d.lewis.q}” (C.S. Lewis, <i>${d.lewis.src}</i>)</p>`:''}
  ${(()=>{const c=d.cat||(w&&w.cat);return c?`<h2>Catechism: ${esc(c.part)}</h2><p><b>${esc(c.text)}</b></p><p><i>What does this mean?</i> ${esc(c.mean)}</p>`:''})()}
  <h2>Questions</h2>${d.q.map(([w,t])=>`<p><b>${w}:</b> ${t}</p>`).join('')}<h2>Highs and lows · Doxology</h2>
- <h2>Closing prayer</h2><p>${d.prayer} ${hlPrayer(d.date,true)} ${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
+ <h2>Closing prayer</h2><p>${d.prayer}</p>${hlPrayer(d.date,true)}<p>${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></div>`}
 function doPrint(html){$('#printArea').innerHTML=html;window.print()}
 
 function famEditor(){const f=S.family;return `<div class="fam"><p class="note">Who’s joining devotions? Add each person once. Tap 📖 to take someone out of the Scripture-reading rotation.</p>
