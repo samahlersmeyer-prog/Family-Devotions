@@ -158,7 +158,7 @@ function synth(notes,total){const sr=22050,n=Math.ceil(sr*total),buf=new Float32
   for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,buf[i]))*32000,true);
   return URL.createObjectURL(new Blob([dv],{type:'audio/wav'}))}
 const CLIPS={note:()=>synth([[HZ.G3,0,.9,.18],[HZ.B3,0,.9,.18],[HZ.D4,0,.9,.18],[HZ.G4,1.05,1.8,.55]],3.4),
-  line:()=>{const b=.71,seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
+  line:(b=.71)=>{seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
     for(const [k,l] of seq){ns.push([HZ[k],t,b*l-.04,.5]);t+=b*l}return synth(ns,t+.6)}};
 const audio={};
 function stopAll(){Object.values(audio).forEach(a=>{a.pause()})}
@@ -166,10 +166,16 @@ function play(name,make){stopAll();
   if(!audio[name]){audio[name]=new Audio((make||CLIPS[name])());audio[name].preload='auto'}
   const a=audio[name];try{a.currentTime=0}catch(e){}const pr=a.play();if(pr&&pr.catch)pr.catch(()=>toast('Tap again to play the note.'))}
 function playNote(){play('note')}
-function playLine(){play('line')}
+function playLine(){play('line-'+doxBpm,()=>CLIPS.line(30/doxBpm))}
 let doxOpen=false,doxPart='',doxSoft=true;
+// Tempo (quarter-note beats per minute) and rest between lines (seconds), adjustable on the page and remembered per phone.
+let doxBpm=+ls.get('doxBpm')||42,doxRest=ls.get('doxRest');if(typeof doxRest!=='number')doxRest=2.8;
+function doxCtl(){const b=(a,d,t)=>`<button type="button" class="btn small ghost step-btn" data-a="${a}" data-d="${d}" aria-label="${t}">${d<0?'−':'+'}</button>`;
+  return `<div class="doxctl"><span class="dg"><span class="dl">Tempo</span>${b('tempo',-4,'Slower')}<b id="bpmV">${doxBpm}</b>${b('tempo',4,'Faster')}</span><span class="dg"><span class="dl">Rest</span>${b('rest',-.5,'Shorter rest')}<b id="restV">${doxRest}s</b>${b('rest',.5,'Longer rest')}</span></div>`}
+function doxAdj(k,d){if(k==='tempo'){doxBpm=Math.max(24,Math.min(96,doxBpm+d));ls.set('doxBpm',doxBpm)}else{doxRest=Math.max(0,Math.min(8,Math.round((doxRest+d)*10)/10));ls.set('doxRest',doxRest)}
+  const a=$('#bpmV'),r=$('#restV');if(a)a.textContent=doxBpm;if(r)r.textContent=doxRest+'s';if(doxPart)playDox(doxPart)}
 function playDox(v){doxPart=v;const box=$('.dox-parts');if(box){box.dataset.part=v;box.querySelectorAll('.vbtn').forEach(b=>{const on=b.dataset.v===v;b.classList.toggle('on',on);b.setAttribute('aria-pressed',on)})}
-  play(`dox-${v}-${doxSoft?1:0}`,()=>doxClip(v,doxSoft,synth))}
+  play(`dox-${v}-${doxSoft?1:0}-${doxBpm}-${doxRest}`,()=>doxClip(v,doxSoft,synth,30/doxBpm,doxRest))}
 
 // ---------- views ----------
 function hymnStep(w){if(!w)return '';const h=w.hymn;return `<section class="step"><h3>Hymn of the week</h3><p class="ref">${esc(h.title)} · ${esc(h.by)}</p><p class="hymn">${h.lines.map(esc).join('<br>')}</p><p class="note">Same hymn all week, so by the end everyone knows it.</p></section>`}
@@ -190,7 +196,7 @@ function devotion(d){const v=d.verses.map(([n,t])=>`<sup>${n}</sup>${t}`).join('
  ${catStep(d.cat?Object.assign({daily:1},d.cat):(w&&w.cat))}
  <section class="step"><h3>Questions</h3><ul class="qs">${d.q.map(([w,t])=>`<li><span class="who">${w}</span>${t}</li>`).join('')}</ul></section>
  <section class="step" id="hl"><h3>Highs, lows, and prayers</h3>${hlBlock()}</section>
- <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div><p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${typeof doxParts==='function'?doxParts(doxOpen,doxPart,doxSoft):''}</section>
+ <section class="step"><h3>Doxology</h3><div class="tune"><button class="btn small" type="button" data-a="note">♪ Starting note</button><button class="btn small" type="button" data-a="line">▶ First line</button></div>${doxCtl()}<p class="hymn">Praise God, from whom all blessings flow;<br>Praise Him, all creatures here below;<br>Praise Him above, ye heavenly host;<br>Praise Father, Son, and Holy Ghost. Amen.</p><p class="note">Old Hundredth, in G. Turn your volume up.</p>${typeof doxParts==='function'?doxParts(doxOpen,doxPart,doxSoft):''}</section>
  <section class="step"><h3>Closing prayer</h3><p>${d.prayer}</p><div id="hlPrayer" class="ins">${hlPrayer(cur)}</div><p>${d.ask} Watch over us tonight and let Your holy angels be with us. In Jesus’ name. Amen.</p><p>Pray the Lord’s Prayer together.</p></section>
  </div>`}
 function kids(d){const k=d.kids;
@@ -309,7 +315,7 @@ const ACT={
  done:()=>{put(['done',cur],S.done[cur]?null:true);render()},
  ans:()=>{showAns=!showAns;render()},
  printKids:()=>doPrint(sheet(byDate[cur])),printDevo:()=>doPrint(devoPrint(byDate[cur])),
- note:()=>playNote(),line:()=>playLine(),
+ note:()=>playNote(),line:()=>playLine(),tempo:b=>doxAdj('tempo',+b.dataset.d),rest:b=>doxAdj('rest',+b.dataset.d),
  dox:b=>playDox(b.dataset.v),doxStop:()=>{stopAll();doxPart='';const box=$('.dox-parts');if(box){box.dataset.part='';box.querySelectorAll('.vbtn').forEach(b=>{b.classList.remove('on');b.setAttribute('aria-pressed',false)})}},
  swapRd:()=>{const r=readers(),c=readerFor(byDate[cur]);put(['rd',cur],r[(r.indexOf(c)+1)%r.length]);render()},
  editFam:()=>{editFam=true;render()},famDone:()=>{editFam=false;render()},

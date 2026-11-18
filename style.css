@@ -202,3 +202,5 @@ label.btn{display:inline-block}
 .dox-parts[data-part=S] .v-S,.dox-parts[data-part=A] .v-A,.dox-parts[data-part=T] .v-T,.dox-parts[data-part=B] .v-B{stroke:#b7802a;fill:#b7802a}
 .dox-parts[data-part=S] .slur.v-S,.dox-parts[data-part=A] .slur.v-A,.dox-parts[data-part=T] .slur.v-T,.dox-parts[data-part=B] .slur.v-B{fill:none}
 .dox-parts[data-part=S] .nh.half.v-S,.dox-parts[data-part=A] .nh.half.v-A,.dox-parts[data-part=T] .nh.half.v-T,.dox-parts[data-part=B] .nh.half.v-B{fill:#fff}
+
+.doxctl{display:flex;gap:.4rem 1rem;flex-wrap:wrap;margin:.1rem 0 .4rem}.doxctl .dg{display:inline-flex;align-items:center;gap:.3rem;white-space:nowrap}.doxctl .dl{color:var(--muted);font-family:var(--display);font-size:.92rem}.doxctl b{min-width:2.1rem;text-align:center;font-family:var(--display)}.step-btn{min-width:2rem;padding-left:.5rem!important;padding-right:.5rem!important;justify-content:center}
