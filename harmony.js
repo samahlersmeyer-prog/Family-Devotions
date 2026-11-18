@@ -70,7 +70,8 @@ function doxParts(open,part,soft){
 
 // ---------- audio ----------
 function doxClip(part,soft,synth){const b=.62,notes=[];let t=.1;
- for(let li=0;li<4;li++){const bt=DOX.beats[li],P={};for(const v of 'SATB')P[v]=doxSlots(v,li);
+ for(let li=0;li<4;li++){if(li)t+=b*2.5;   // rest between lines
+  const bt=DOX.beats[li],P={};for(const v of 'SATB')P[v]=doxSlots(v,li);
   for(let i=0;i<bt.length;i++){if(li===3&&i===8)t+=b*.5;      // a breath before the Amen
    for(const v of 'SATB'){const vol=part==='all'?.24:(v===part?.5:(soft?.08:0));if(!vol)continue;
      const ps=P[v][i],d=b*bt[i]/ps.length;ps.forEach((p,k)=>notes.push([doxHz(p),t+k*d,d-.04,vol]))}
