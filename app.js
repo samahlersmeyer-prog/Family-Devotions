@@ -158,7 +158,7 @@ function synth(notes,total){const sr=22050,n=Math.ceil(sr*total),buf=new Float32
   for(let i=0;i<n;i++)dv.setInt16(44+i*2,Math.max(-1,Math.min(1,buf[i]))*32000,true);
   return URL.createObjectURL(new Blob([dv],{type:'audio/wav'}))}
 const CLIPS={note:()=>synth([[HZ.G3,0,.9,.18],[HZ.B3,0,.9,.18],[HZ.D4,0,.9,.18],[HZ.G4,1.05,1.8,.55]],3.4),
-  line:(b=.71)=>{seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
+  line:(b=30/46)=>{seq=[['G4',2],['G4',1],['Fs4',1],['E4',1],['D4',1],['G4',2],['A4',2],['B4',2.5]];let t=.05;const ns=[];
     for(const [k,l] of seq){ns.push([HZ[k],t,b*l-.04,.5]);t+=b*l}return synth(ns,t+.6)}};
 const audio={};
 function stopAll(){Object.values(audio).forEach(a=>{a.pause()})}
@@ -169,7 +169,7 @@ function playNote(){play('note')}
 function playLine(){play('line-'+doxBpm,()=>CLIPS.line(30/doxBpm))}
 let doxOpen=false,doxPart='',doxSoft=true;
 // Tempo (quarter-note beats per minute) and rest between lines (seconds), adjustable on the page and remembered per phone.
-let doxBpm=+ls.get('doxBpm')||42,doxRest=ls.get('doxRest');if(typeof doxRest!=='number')doxRest=2.8;
+let doxBpm=+ls.get('doxBpm')||46,doxRest=ls.get('doxRest');if(typeof doxRest!=='number')doxRest=1.8;
 function doxCtl(){const b=(a,d,t)=>`<button type="button" class="btn small ghost step-btn" data-a="${a}" data-d="${d}" aria-label="${t}">${d<0?'−':'+'}</button>`;
   return `<div class="doxctl"><span class="dg"><span class="dl">Tempo</span>${b('tempo',-4,'Slower')}<b id="bpmV">${doxBpm}</b>${b('tempo',4,'Faster')}</span><span class="dg"><span class="dl">Rest</span>${b('rest',-.5,'Shorter rest')}<b id="restV">${doxRest}s</b>${b('rest',.5,'Longer rest')}</span></div>`}
 function doxAdj(k,d){if(k==='tempo'){doxBpm=Math.max(24,Math.min(96,doxBpm+d));ls.set('doxBpm',doxBpm)}else{doxRest=Math.max(0,Math.min(8,Math.round((doxRest+d)*10)/10));ls.set('doxRest',doxRest)}
