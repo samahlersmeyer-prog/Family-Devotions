@@ -169,7 +169,7 @@ function playNote(){play('note')}
 function playLine(){play('line-'+doxBpm,()=>CLIPS.line(30/doxBpm))}
 let doxOpen=false,doxPart='',doxSoft=true;
 // Tempo (quarter-note beats per minute) and rest between lines (seconds), adjustable on the page and remembered per phone.
-let doxBpm=+ls.get('doxBpm')||46,doxRest=ls.get('doxRest');if(typeof doxRest!=='number')doxRest=1.8;
+let doxBpm=+ls.get('doxBpm')||46,doxRest=ls.get('doxRest');if(typeof doxRest!=='number')doxRest=1.3;
 function doxCtl(){const b=(a,d,t)=>`<button type="button" class="btn small ghost step-btn" data-a="${a}" data-d="${d}" aria-label="${t}">${d<0?'−':'+'}</button>`;
   return `<div class="doxctl"><span class="dg"><span class="dl">Tempo</span>${b('tempo',-4,'Slower')}<b id="bpmV">${doxBpm}</b>${b('tempo',4,'Faster')}</span><span class="dg"><span class="dl">Rest</span>${b('rest',-.5,'Shorter rest')}<b id="restV">${doxRest}s</b>${b('rest',.5,'Longer rest')}</span></div>`}
 function doxAdj(k,d){if(k==='tempo'){doxBpm=Math.max(24,Math.min(96,doxBpm+d));ls.set('doxBpm',doxBpm)}else{doxRest=Math.max(0,Math.min(8,Math.round((doxRest+d)*10)/10));ls.set('doxRest',doxRest)}
