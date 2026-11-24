@@ -120,6 +120,7 @@ const andList=a=>a.length<2?(a[0]||''):a.length===2?`${a[0]} and ${a[1]}`:`${a.s
 const items=t=>String(t||'').split(/[,;\n]+/).map(s=>s.trim().replace(/[.!?]+$/,'')).filter(Boolean);
 const norm=s=>s.toLowerCase().replace(/\s+/g,' ').trim();
 const ARTS=/^(the|a|an|his|her|their|your|our|all)\s/i;
+const reqLabel=r=>r.who?`${esc(r.who)}: ${esc(r.t)}`:esc(r.t);
 const poss=o=>andList(o.map(esc))+'’s';
 function groupItems(day,k){const e=S.log[day]||{};const who=S.family.filter(n=>e[n]&&items(e[n][k]).length);const m=new Map();
   who.forEach(n=>items(e[n][k]).forEach(t=>{const key=norm(t);if(!m.has(key))m.set(key,{t,owners:[]});const o=m.get(key);if(!o.owners.includes(n))o.owners.push(n)}));
