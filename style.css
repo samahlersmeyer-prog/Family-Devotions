@@ -145,6 +145,9 @@ label.btn{display:inline-block}
 .cat-text{font-size:1.1rem}
 /* ---- Highs/lows ---- */
 .lowwrap{display:flex;gap:.3rem;min-width:0}
+.hlrow .bufin{grid-column:2/-1}
+label.ans-ck.bufck{display:block;white-space:normal;margin:.2rem 0 .5rem}
+@media (max-width:440px){.hlrow .bufin{grid-column:1/-1}}
 .mini{border:1.5px solid var(--line);background:var(--card);border-radius:10px;padding:0 .45rem;font-size:1rem;cursor:pointer;flex:none}
 .preqs{margin-top:.6rem}
 .famchip{display:inline-flex;align-items:center;gap:.25rem}
