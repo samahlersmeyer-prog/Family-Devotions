@@ -13,7 +13,7 @@ const clone=o=>JSON.parse(JSON.stringify(o));
 const KEYS=['family','log','done','prayers','known','noread','rd'];
 const DEF={family:[],log:{},done:{},prayers:{},known:{},noread:[],rd:{}};
 let S={};KEYS.forEach(k=>{const v=ls.get(k);S[k]=(v&&typeof v==='object')?v:clone(DEF[k])});
-let DAYS=[],byDate={},cur=null,tab='devotion',showAns=false,editFam=false,jFilter='',ansOpen=null,quiz=false,famReturn='devotion';
+let DAYS=[],byDate={},cur=null,tab='devotion',showAns=false,editFam=false,jFilter='',ansOpen=null,quiz=false,famReturn='devotion',bufOn={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad=n=>String(n).padStart(2,'0');
 const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
@@ -31,7 +31,7 @@ function setPath(o,p,v){let x=o;for(let i=0;i<p.length-1;i++){if(!x[p[i]]||typeo
 function prune(o,p){for(let n=p.length-1;n>0;n--){let x=o;for(let i=0;i<n-1;i++){x=x&&x[p[i]]}const k=p[n-1];
   if(x&&x[k]&&typeof x[k]==='object'&&!Array.isArray(x[k])&&!Object.keys(x[k]).length)delete x[k];else break}}
 function cleanLog(log){for(const d in log){const day=log[d];if(!day||typeof day!=='object'){delete log[d];continue}
-  for(const n in day){const e=day[n];if(!e||(!e.h&&!e.l))delete day[n]}if(!Object.keys(day).length)delete log[d]}return log}
+  for(const n in day){const e=day[n];if(!e||(!e.h&&!e.l&&!e.b))delete day[n]}if(!Object.keys(day).length)delete log[d]}return log}
 function persist(){KEYS.forEach(k=>ls.set(k,S[k]))}
 function put(p,v,opt){setPath(S,p,v);prune(S,p);ls.set(p[0],S[p[0]]);sync.write(p,v,opt)}
 
@@ -138,11 +138,11 @@ const reqLi=r=>`<li>${r.who?`<b>${esc(r.who)}</b> — ${esc(r.t.replace(/^my\s/i
 function hlPrayer(day,print){const blank=t=>print?'______':`<span class="blank">${t}</span>`;
   const act=activeReqs(day).filter(([,r])=>r.src!==day||r.ans===day);
   const thanks=act.filter(([,r])=>r.ans===day).map(([,r])=>reqLi(r)),asks=act.filter(([,r])=>r.ans!==day).map(([,r])=>reqLi(r));
-  let hi=hlGroups(day,'h'),lo=hlGroups(day,'l');
+  let hi=hlGroups(day,'h'),lo=hlGroups(day,'l'),bu=hlGroups(day,'b');
   if(!hi.length&&(S.family.length||!asks.length))hi=[`<li>${blank('(today’s highs)')}</li>`];
   if(!lo.length&&(S.family.length||!asks.length))lo=[`<li>${blank('(today’s lows)')}</li>`];
   const sec=(lead,lis)=>lis.length?`<p class="plead">${lead}</p><ul class="pbul">${lis.join('')}</ul>`:'';
-  return sec('Thank You for…',hi)+sec(`Thank You for answering our prayer${thanks.length>1?'s':''} for…`,thanks)+sec('Please help…',lo)+sec('We also pray for…',asks)}
+  return sec('Thank You for…',hi)+sec(`Thank You for answering our prayer${thanks.length>1?'s':''} for…`,thanks)+sec('Please help…',lo)+sec('You were with us in the surprises…',bu)+sec('We also pray for…',asks)}
 
 // ---------- audio (Doxology: Old Hundredth in G) ----------
 // Notes are rendered once into small WAV clips and played with <audio>. iOS Safari keeps <audio>
@@ -234,10 +234,11 @@ function famEditor(){const f=S.family;return `<div class="fam"><p class="note">W
 function hlBlock(){const reqs=activeReqs(cur).filter(([,r])=>r.ans!==cur);
  const reqLine=`<div class="preqs"><p class="note">${reqs.length?`Praying for: ${reqs.map(([,r])=>`<span class="pill">${reqLabel(r)}</span>`).join(' ')}`:'No prayer requests yet.'} <button type="button" class="link" data-a="tab" data-t="prayer">${reqs.length?'Prayer list':'Add one'}</button></p></div>`;
  if(!S.family.length||editFam)return `<p>Everyone shares one high and one low, Mom and Dad included.</p>${famEditor()}${reqLine}`;
- const e=S.log[cur]||{};
- return `<p>Everyone shares a high and a low. Separate a few with commas. They’ll show up in the closing prayer. Tap 🙏 to keep praying for a low on the coming nights.</p><div class="hlrows">${S.family.map((n,i)=>`<div class="hlrow"><span class="who">${esc(n)}</span>
+ const e=S.log[cur]||{};const showB=cur in bufOn?bufOn[cur]:S.family.some(n=>(e[n]||{}).b);
+ return `<p>Everyone shares a high and a low. Separate a few with commas. They’ll show up in the closing prayer. Tap 🙏 to keep praying for a low on the coming nights.</p>
+ <label class="ans-ck bufck"><input type="checkbox" id="bufTg" ${showB?'checked':''}> 🦬 Buffaloes tonight <span class="note">(something unusual that happened, good or bad)</span></label><div class="hlrows">${S.family.map((n,i)=>`<div class="hlrow"><span class="who">${esc(n)}</span>
  <label class="sr" for="h${i}">${esc(n)} high</label><input id="h${i}" data-n="${esc(n)}" data-k="h" placeholder="High ☀" value="${esc((e[n]||{}).h||'')}" maxlength="140">
- <div class="lowwrap"><label class="sr" for="l${i}">${esc(n)} low</label><input id="l${i}" data-n="${esc(n)}" data-k="l" placeholder="Low ☁" value="${esc((e[n]||{}).l||'')}" maxlength="140"><button type="button" class="mini" data-a="prayLow" data-i="${i}" aria-label="Add ${esc(n)}’s low to the prayer list" title="Keep praying for this">🙏</button></div></div>`).join('')}</div>
+ <div class="lowwrap"><label class="sr" for="l${i}">${esc(n)} low</label><input id="l${i}" data-n="${esc(n)}" data-k="l" placeholder="Low ☁" value="${esc((e[n]||{}).l||'')}" maxlength="140"><button type="button" class="mini" data-a="prayLow" data-i="${i}" aria-label="Add ${esc(n)}’s low to the prayer list" title="Keep praying for this">🙏</button></div>${showB?`<label class="sr" for="b${i}">${esc(n)} buffalo</label><input id="b${i}" class="bufin" data-n="${esc(n)}" data-k="b" placeholder="Buffalo 🦬" value="${esc((e[n]||{}).b||'')}" maxlength="140">`:''}</div>`).join('')}</div>
  ${reqLine}<p class="note">${sync.pin?'Synced with your family.':'Saved on this device.'} <button type="button" class="link" data-a="editFam">Edit family</button></p>`}
 
 function nightsPrayed(r){const end=r.ans||todayISO;return Object.keys(S.done).filter(d=>S.done[d]&&d>=(r.added||'')&&d<=end).length}
@@ -262,9 +263,9 @@ function prayerTab(){const act=activeReqs(todayISO).filter(([,r])=>!r.ans);
  </div>`}
 
 function journal(){const log=S.log;const dates=Object.keys(log).sort().reverse();const names=[...new Set(dates.flatMap(d=>Object.keys(log[d]||{})))];
- const rows=dates.map(dt=>{const ents=Object.entries(log[dt]||{}).filter(([n,x])=>x&&(x.h||x.l)&&(!jFilter||n===jFilter));if(!ents.length)return '';
+ const rows=dates.map(dt=>{const ents=Object.entries(log[dt]||{}).filter(([n,x])=>x&&(x.h||x.l||x.b)&&(!jFilter||n===jFilter));if(!ents.length)return '';
   return `<section class="step jday"><p class="ref"><button type="button" class="link" data-a="go" data-d="${dt}">${fmt(dt)}${byDate[dt]?' · '+esc(byDate[dt].title):''}</button></p>
-  ${ents.map(([n,x])=>`<div class="jent"><span class="who">${esc(n)}</span>${x.h?`<p>☀ ${esc(x.h)}</p>`:''}${x.l?`<p class="${x.ok?'okd':''}">☁ ${esc(x.l)} <label class="ans-ck"><input type="checkbox" data-d="${dt}" data-n="${esc(n)}" ${x.ok?'checked':''}> God answered</label> <button type="button" class="link small" data-a="jPray" data-d="${dt}" data-n="${esc(n)}">🙏 Keep praying</button></p>`:''}</div>`).join('')}</section>`}).join('');
+  ${ents.map(([n,x])=>`<div class="jent"><span class="who">${esc(n)}</span>${x.h?`<p>☀ ${esc(x.h)}</p>`:''}${x.l?`<p class="${x.ok?'okd':''}">☁ ${esc(x.l)} <label class="ans-ck"><input type="checkbox" data-d="${dt}" data-n="${esc(n)}" ${x.ok?'checked':''}> God answered</label> <button type="button" class="link small" data-a="jPray" data-d="${dt}" data-n="${esc(n)}">🙏 Keep praying</button></p>`:''}${x.b?`<p>🦬 ${esc(x.b)}</p>`:''}</div>`).join('')}</section>`}).join('');
  return `<div class="steps"><div class="toolbar"><span class="note">Highs and lows from every night, newest first.</span></div>
  ${names.length>1?`<div class="bank">${['',...names].map(n=>`<button type="button" class="chip fbtn ${jFilter===n?'on':''}" data-a="jf" data-f="${esc(n)}">${n?esc(n):'Everyone'}</button>`).join('')}</div>`:''}
  ${rows||'<section class="step"><p>No entries yet. Share highs and lows on the Devotion tab, and they’ll collect here for you to look back on.</p></section>'}</div>`}
@@ -346,6 +347,7 @@ main.addEventListener('change',e=>{const t=e.target;
  if(t.id==='doxSoft'){doxSoft=t.checked;if(doxPart)playDox(doxPart)}
  if(t.matches('.ans-ck input[data-d]')){put(['log',t.dataset.d,t.dataset.n,'ok'],t.checked||null);t.closest('p').classList.toggle('okd',t.checked)}
  if(t.matches('[data-known]')){put(['known',t.dataset.known],t.checked||null);t.closest('.verse').classList.toggle('known',t.checked);const v=verseList();const tb=main.querySelector('.toolbar b');if(tb)tb.textContent=v.filter(x=>S.known[x.r]).length}
+ if(t.id==='bufTg'){bufOn[cur]=t.checked;render();if(t.checked){const b=$('#b0');if(b)b.focus()}}
  if(t.id==='pKind'){$('#pUntilWrap').hidden=t.value!=='thru'}
  if(t.id==='rs'){const f=t.files[0];if(!f)return;f.text().then(x=>{const j=JSON.parse(x);if(!j.log)throw 0;
    KEYS.forEach(k=>{if(j[k]!=null)put([k],union(S[k],j[k]))});render();const m=$('#bkMsg');if(m)m.textContent='Backup restored.'}).catch(()=>{$('#bkMsg').textContent='That file isn’t a journal backup. Pick the .json file you saved.'})}});
